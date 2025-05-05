@@ -78,6 +78,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:backgroundTint="#00000000"
+                android:contentDescription="搜尋功能"
                 app:srcCompat="@android:drawable/ic_menu_search" />
 
             <ImageButton
@@ -86,6 +87,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:backgroundTint="#00000000"
+                android:contentDescription="地圖功能"
                 app:srcCompat="@android:drawable/ic_dialog_map" />
 
             <ImageButton
@@ -94,6 +96,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:backgroundTint="#00000000"
+                android:contentDescription="我的收藏"
                 app:srcCompat="@android:drawable/ic_menu_myplaces" />
         </LinearLayout>
     </com.google.android.material.bottomnavigation.BottomNavigationView>
@@ -102,11 +105,13 @@
         android:id="@+id/floatingActionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="16dp"
         android:clickable="true"
+        android:contentDescription="新增項目"
         app:backgroundTint="#79CBF0"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
         app:rippleColor="#FFFFFF"
-        app:srcCompat="@android:drawable/ic_input_add"
-        tools:layout_editor_absoluteX="338dp"
-        tools:layout_editor_absoluteY="581dp" />
+        app:srcCompat="@android:drawable/ic_input_add" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
