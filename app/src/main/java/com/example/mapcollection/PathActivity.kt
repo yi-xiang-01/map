@@ -10,6 +10,12 @@ class PathActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_path)
 
+        // 設置推薦按鈕點擊事件
+        findViewById<ImageButton>(R.id.btnRecommend).setOnClickListener {
+            val intent = Intent(this, RecommendActivity::class.java)
+            startActivity(intent)
+        }
+
         // 設置搜尋按鈕點擊事件
         findViewById<ImageButton>(R.id.btnSearch).setOnClickListener {
             val intent = Intent(this, SearchActivity::class.java)

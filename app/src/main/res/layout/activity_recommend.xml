@@ -2,11 +2,20 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SearchActivity">
+    tools:context=".RecommendActivity">
 
     <!-- 底部导航栏 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="409dp"
+        android:layout_height="649dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="1dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"
@@ -45,8 +54,8 @@
                 android:layout_weight="1"
                 android:backgroundTint="#00000000"
                 android:contentDescription="地圖功能"
-                app:tint="#C1C1C1"
-                app:srcCompat="@android:drawable/ic_dialog_map" />
+                app:srcCompat="@android:drawable/ic_dialog_map"
+                app:tint="#C1C1C1" />
 
             <ImageButton
                 android:id="@+id/btnProfile"
@@ -58,24 +67,5 @@
                 app:srcCompat="@android:drawable/ic_menu_myplaces" />
         </LinearLayout>
     </com.google.android.material.bottomnavigation.BottomNavigationView>
-
-    <EditText
-        android:id="@+id/editTextText"
-        android:layout_width="346dp"
-        android:layout_height="56dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
-        android:ems="10"
-        android:hint="搜尋地圖"
-        android:inputType="text"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="409dp"
-        android:layout_height="577dp"
-        android:layout_marginTop="2dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -13,11 +13,14 @@
         android:theme="@style/Theme.MapCollection"
         tools:targetApi="31">
         <activity
+            android:name=".RecommendActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MapCollection" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

@@ -19,6 +19,16 @@
             android:orientation="horizontal">
 
             <ImageButton
+                android:id="@+id/btnRecommend"
+                android:layout_width="wrap_content"
+                android:layout_height="54dp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/white"
+                android:contentDescription="推薦功能"
+                app:srcCompat="?attr/actionModePasteDrawable"
+                app:tint="#BCBCBC" />
+
+            <ImageButton
                 android:id="@+id/btnSearch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -34,7 +44,8 @@
                 android:layout_weight="1"
                 android:backgroundTint="#00000000"
                 android:contentDescription="地圖功能"
-                app:srcCompat="@android:drawable/ic_dialog_map" />
+                app:srcCompat="@android:drawable/ic_dialog_map"
+                app:tint="#C1C1C1" />
 
             <ImageButton
                 android:id="@+id/btnProfile"
@@ -47,14 +58,25 @@
         </LinearLayout>
     </com.google.android.material.bottomnavigation.BottomNavigationView>
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="144dp"
-        android:layout_marginTop="120dp"
-        android:text="計算路徑/景點推薦\n頁面"
-        android:textAlignment="center"
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="409dp"
+        android:layout_height="649dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="1dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:clickable="true"
+        android:contentDescription="新增項目"
+        app:backgroundTint="#79CBF0"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:rippleColor="#FFFFFF"
+        app:srcCompat="@android:drawable/ic_input_add" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,16 +3,25 @@ package com.example.mapcollection
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageButton
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
-class SearchActivity : AppCompatActivity() {
+class RecommendActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_search)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_recommend)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
 
-        // 設置推薦按鈕點擊事件
-        findViewById<ImageButton>(R.id.btnRecommend).setOnClickListener {
-            val intent = Intent(this, RecommendActivity::class.java)
+        // 設置搜尋按鈕點擊事件
+        findViewById<ImageButton>(R.id.btnSearch).setOnClickListener {
+            val intent = Intent(this, SearchActivity::class.java)
             startActivity(intent)
         }
 
@@ -28,4 +37,4 @@ class SearchActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
-} 
+}
