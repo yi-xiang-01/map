@@ -77,41 +77,43 @@
 
             <ImageButton
                 android:id="@+id/btnRecommend"
-                android:layout_width="wrap_content"
+                android:layout_width="53dp"
                 android:layout_height="51dp"
                 android:layout_weight="1"
                 android:backgroundTint="@color/white"
                 android:contentDescription="推薦功能"
-                app:srcCompat="?attr/actionModePasteDrawable"
-                app:tint="#BCBCBC" />
+                android:scaleType="fitCenter"
+                android:src="@drawable/home2" />
 
             <ImageButton
                 android:id="@+id/btnSearch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="53dp"
+                android:layout_height="51dp"
                 android:layout_weight="1"
-                android:backgroundTint="#00000000"
+                android:backgroundTint="@color/white"
                 android:contentDescription="搜尋功能"
-                app:srcCompat="@android:drawable/ic_menu_search" />
+                android:scaleType="fitCenter"
+                android:src="@drawable/search" />
 
             <ImageButton
                 android:id="@+id/btnPath"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="53dp"
+                android:layout_height="51dp"
                 android:layout_weight="1"
-                android:backgroundTint="#00000000"
-                android:contentDescription="地圖功能"
-                app:tint="#C1C1C1"
-                app:srcCompat="@android:drawable/ic_dialog_map" />
+                android:backgroundTint="@color/white"
+                android:contentDescription="路徑功能"
+                android:scaleType="fitCenter"
+                android:src="@drawable/path2" />
 
             <ImageButton
                 android:id="@+id/btnProfile"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="53dp"
+                android:layout_height="51dp"
                 android:layout_weight="1"
-                android:backgroundTint="#00000000"
-                android:contentDescription="我的收藏"
-                app:srcCompat="@android:drawable/ic_menu_myplaces" />
+                android:backgroundTint="@color/white"
+                android:contentDescription="個人頁面"
+                android:scaleType="fitCenter"
+                android:src="@drawable/profile2" />
 
         </LinearLayout>
     </com.google.android.material.bottomnavigation.BottomNavigationView>
