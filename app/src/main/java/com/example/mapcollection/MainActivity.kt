@@ -17,11 +17,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.textfield.TextInputEditText
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.ActivityResultLauncher
 
 class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private val posts = mutableListOf<Post>()
     private val mapTypes = arrayOf("咖啡廳", "餐廳", "衣服店", "住宿", "台南景點", "墾丁景點","其他")
+    private lateinit var mapsActivityLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +39,18 @@ class MainActivity : AppCompatActivity() {
         setupRecyclerView()
         setupNavigationButtons()
         setupFloatingButton()
+
+        mapsActivityLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == android.app.Activity.RESULT_OK) {
+                val data = result.data
+                val mapName = data?.getStringExtra("mapName") ?: ""
+                val mapType = data?.getStringExtra("mapType") ?: ""
+                posts.add(Post(mapName, mapType))
+                recyclerView.adapter?.notifyItemInserted(posts.size - 1)
+            }
+        }
     }
 
     private fun setupRecyclerView() {
@@ -66,35 +81,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupFloatingButton() {
         findViewById<FloatingActionButton>(R.id.floatingActionButton).setOnClickListener {
-            showNewPostDialog()
+            val intent = Intent(this, MapsActivity::class.java)
+            mapsActivityLauncher.launch(intent)
         }
-    }
-
-    private fun showNewPostDialog() {
-        val dialog = BottomSheetDialog(this)
-        val view = layoutInflater.inflate(R.layout.card_newpost, null)
-        dialog.setContentView(view)
-
-        val mapNameInput = view.findViewById<TextInputEditText>(R.id.mapNameInput)
-        val mapTypeInput = view.findViewById<AutoCompleteTextView>(R.id.mapTypeInput)
-        val confirmButton = view.findViewById<Button>(R.id.confirmButton)
-
-        // 設置地圖種類下拉選單
-        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, mapTypes)
-        mapTypeInput.setAdapter(adapter)
-
-        confirmButton.setOnClickListener {
-            val mapName = mapNameInput.text.toString()
-            val mapType = mapTypeInput.text.toString()
-            
-            if (mapName.isNotEmpty() && mapType.isNotEmpty()) {
-                posts.add(Post(mapName, mapType))
-                recyclerView.adapter?.notifyItemInserted(posts.size - 1)
-                dialog.dismiss()
-            }
-        }
-
-        dialog.show()
     }
 }
 
