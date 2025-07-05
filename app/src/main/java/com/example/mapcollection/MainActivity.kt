@@ -31,6 +31,9 @@ class MainActivity : AppCompatActivity() {
     private var editingPosition: Int? = null
     private lateinit var sharedPreferences: SharedPreferences
     private val gson = Gson()
+    private lateinit var editProfileLauncher: ActivityResultLauncher<Intent>
+    private lateinit var userNameText: TextView
+    private lateinit var userLabelText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,9 +47,11 @@ class MainActivity : AppCompatActivity() {
 
         sharedPreferences = getSharedPreferences("MapCollection", MODE_PRIVATE)
         loadPosts()
+        loadUserProfile()
         setupRecyclerView()
         setupNavigationButtons()
         setupFloatingButton()
+        setupEditProfileButton()
 
         mapsActivityLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
@@ -64,6 +69,18 @@ class MainActivity : AppCompatActivity() {
                     recyclerView.adapter?.notifyItemInserted(posts.size - 1)
                 }
                 savePosts()
+            }
+        }
+
+        editProfileLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == android.app.Activity.RESULT_OK) {
+                val data = result.data
+                val userName = data?.getStringExtra("userName") ?: ""
+                val userLabel = data?.getStringExtra("userLabel") ?: ""
+                saveUserProfile(userName, userLabel)
+                updateUserProfileDisplay(userName, userLabel)
             }
         }
     }
@@ -108,6 +125,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupEditProfileButton() {
+        findViewById<Button>(R.id.btnEditProfile).setOnClickListener {
+            val intent = Intent(this, EditProfileActivity::class.java)
+            // 傳遞當前使用者資料
+            intent.putExtra("currentUserName", userNameText.text.toString())
+            intent.putExtra("currentUserLabel", userLabelText.text.toString())
+            editProfileLauncher.launch(intent)
+        }
+    }
+
     private fun loadPosts() {
         val json = sharedPreferences.getString("posts", "[]")
         val type = object : TypeToken<List<Post>>() {}.type
@@ -119,6 +146,28 @@ class MainActivity : AppCompatActivity() {
     private fun savePosts() {
         val json = gson.toJson(posts)
         sharedPreferences.edit().putString("posts", json).apply()
+    }
+
+    private fun loadUserProfile() {
+        userNameText = findViewById(R.id.userName)
+        userLabelText = findViewById(R.id.userLabel)
+        
+        val userName = sharedPreferences.getString("userName", "使用者姓名") ?: "使用者姓名"
+        val userLabel = sharedPreferences.getString("userLabel", "個人化標籤") ?: "個人化標籤"
+        
+        updateUserProfileDisplay(userName, userLabel)
+    }
+
+    private fun saveUserProfile(userName: String, userLabel: String) {
+        sharedPreferences.edit()
+            .putString("userName", userName)
+            .putString("userLabel", userLabel)
+            .apply()
+    }
+
+    private fun updateUserProfileDisplay(userName: String, userLabel: String) {
+        userNameText.text = userName
+        userLabelText.text = userLabel
     }
 }
 
