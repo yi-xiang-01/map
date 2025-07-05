@@ -12,10 +12,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="新增貼文"
+            android:layout_margin="16dp"
+            android:text="新增景點"
             android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_margin="16dp"/>
+            android:textStyle="bold" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
@@ -25,10 +25,10 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/mapNameInput"
+                android:id="@+id/edSpotName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="地圖名稱"/>
+                android:hint="景點名稱" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -36,40 +36,54 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-            <AutoCompleteTextView
-                android:id="@+id/mapTypeInput"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edSpotDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="地圖種類"
-                android:inputType="none"/>
+                android:hint="景點介紹"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:maxLines="5" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <FrameLayout
+        <!-- 照片上傳區域 -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="200dp"
             android:layout_marginHorizontal="16dp"
             android:layout_marginBottom="16dp"
-            android:background="#F5F5F5">
+            android:background="#FFFFFF"
+            android:gravity="center"
+            android:orientation="vertical">
 
-            <!-- 這裡將來會放置地圖視圖 -->
-            <TextView
+            <ImageView
+                android:id="@+id/imgSpotPhoto"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:background="@android:color/white"
+                android:scaleType="centerCrop"
+                android:src="@drawable/upload" />
+
+            <Button
+                android:id="@+id/btnUploadPhoto"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="地圖視圖"
-                android:textSize="18sp"/>
+                android:layout_marginTop="8dp"
+                android:text="上傳照片"
+                android:textSize="14sp"
+                app:backgroundTint="#79CBF0" />
 
-        </FrameLayout>
+        </LinearLayout>
 
         <Button
             android:id="@+id/confirmButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="確認"
             android:layout_margin="16dp"
-            android:backgroundTint="#79CBF0"/>
+            android:backgroundTint="#79CBF0"
+            android:text="儲存" />
 
     </LinearLayout>
 </ScrollView>

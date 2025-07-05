@@ -22,6 +22,9 @@ import androidx.activity.result.ActivityResultLauncher
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.widget.ImageView
 
 class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
@@ -34,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var editProfileLauncher: ActivityResultLauncher<Intent>
     private lateinit var userNameText: TextView
     private lateinit var userLabelText: TextView
+    private lateinit var imgProfile: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,8 +83,14 @@ class MainActivity : AppCompatActivity() {
                 val data = result.data
                 val userName = data?.getStringExtra("userName") ?: ""
                 val userLabel = data?.getStringExtra("userLabel") ?: ""
+                val userPhoto = data?.getByteArrayExtra("userPhoto")
+                
                 saveUserProfile(userName, userLabel)
+                if (userPhoto != null) {
+                    saveUserPhoto(userPhoto)
+                }
                 updateUserProfileDisplay(userName, userLabel)
+                loadUserPhoto()
             }
         }
     }
@@ -151,11 +161,13 @@ class MainActivity : AppCompatActivity() {
     private fun loadUserProfile() {
         userNameText = findViewById(R.id.userName)
         userLabelText = findViewById(R.id.userLabel)
+        imgProfile = findViewById(R.id.imgProfile)
         
         val userName = sharedPreferences.getString("userName", "使用者姓名") ?: "使用者姓名"
         val userLabel = sharedPreferences.getString("userLabel", "個人化標籤") ?: "個人化標籤"
         
         updateUserProfileDisplay(userName, userLabel)
+        loadUserPhoto()
     }
 
     private fun saveUserProfile(userName: String, userLabel: String) {
@@ -163,6 +175,25 @@ class MainActivity : AppCompatActivity() {
             .putString("userName", userName)
             .putString("userLabel", userLabel)
             .apply()
+    }
+
+    private fun saveUserPhoto(photoBytes: ByteArray) {
+        sharedPreferences.edit()
+            .putString("userPhoto", android.util.Base64.encodeToString(photoBytes, android.util.Base64.DEFAULT))
+            .apply()
+    }
+
+    private fun loadUserPhoto() {
+        val photoBase64 = sharedPreferences.getString("userPhoto", null)
+        if (photoBase64 != null) {
+            try {
+                val photoBytes = android.util.Base64.decode(photoBase64, android.util.Base64.DEFAULT)
+                val bitmap = BitmapFactory.decodeByteArray(photoBytes, 0, photoBytes.size)
+                imgProfile.setImageBitmap(bitmap)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun updateUserProfileDisplay(userName: String, userLabel: String) {

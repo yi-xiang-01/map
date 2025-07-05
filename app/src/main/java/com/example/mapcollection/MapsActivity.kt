@@ -31,7 +31,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
 
         // 初始化懸浮輸入區
-        val mapNameInput = findViewById<EditText>(R.id.mapNameInput)
+        val mapNameInput = findViewById<EditText>(R.id.edSpotName)
         val mapTypeSpinner = findViewById<Spinner>(R.id.mapTypeSpinner)
         val confirmButton = findViewById<Button>(R.id.confirmButton)
         val mapTypes = arrayOf("咖啡廳", "餐廳", "衣服店", "住宿", "台南景點", "墾丁景點","其他")
