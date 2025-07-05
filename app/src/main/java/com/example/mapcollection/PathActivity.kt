@@ -120,8 +120,16 @@ class PathActivity : AppCompatActivity() {
 
     fun deletePathPost(position: Int) {
         if (position in 0 until pathPosts.size) {
+            // 如果正在編輯被刪除的項目，重置編輯位置
+            if (editingPosition == position) {
+                editingPosition = null
+            } else if (editingPosition != null && editingPosition!! > position) {
+                // 如果編輯位置在被刪除項目之後，需要調整位置
+                editingPosition = editingPosition!! - 1
+            }
+            
             pathPosts.removeAt(position)
-            recyclerView.adapter?.notifyItemRemoved(position)
+            recyclerView.adapter?.notifyDataSetChanged()
             savePathPosts()
         }
     }

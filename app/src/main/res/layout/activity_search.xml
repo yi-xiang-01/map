@@ -12,7 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.9">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -75,9 +76,11 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="409dp"
-        android:layout_height="577dp"
+        android:layout_height="0dp"
         android:layout_marginTop="2dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextText" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextText"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
