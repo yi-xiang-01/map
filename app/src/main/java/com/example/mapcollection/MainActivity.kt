@@ -19,12 +19,18 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.textfield.TextInputEditText
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.ActivityResultLauncher
+import android.content.SharedPreferences
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private val posts = mutableListOf<Post>()
     private val mapTypes = arrayOf("咖啡廳", "餐廳", "衣服店", "住宿", "台南景點", "墾丁景點","其他")
     private lateinit var mapsActivityLauncher: ActivityResultLauncher<Intent>
+    private var editingPosition: Int? = null
+    private lateinit var sharedPreferences: SharedPreferences
+    private val gson = Gson()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +42,8 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        sharedPreferences = getSharedPreferences("MapCollection", MODE_PRIVATE)
+        loadPosts()
         setupRecyclerView()
         setupNavigationButtons()
         setupFloatingButton()
@@ -47,8 +55,15 @@ class MainActivity : AppCompatActivity() {
                 val data = result.data
                 val mapName = data?.getStringExtra("mapName") ?: ""
                 val mapType = data?.getStringExtra("mapType") ?: ""
-                posts.add(Post(mapName, mapType))
-                recyclerView.adapter?.notifyItemInserted(posts.size - 1)
+                if (editingPosition != null) {
+                    posts[editingPosition!!] = Post(mapName, mapType)
+                    recyclerView.adapter?.notifyItemChanged(editingPosition!!)
+                    editingPosition = null
+                } else {
+                    posts.add(Post(mapName, mapType))
+                    recyclerView.adapter?.notifyItemInserted(posts.size - 1)
+                }
+                savePosts()
             }
         }
     }
@@ -56,7 +71,14 @@ class MainActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = GridLayoutManager(this, 3)
-        recyclerView.adapter = PostAdapter(posts)
+        recyclerView.adapter = PostAdapter(posts) { position ->
+            val post = posts[position]
+            val intent = Intent(this, MapsActivity::class.java)
+            intent.putExtra("mapName", post.mapName)
+            intent.putExtra("mapType", post.mapType)
+            editingPosition = position
+            mapsActivityLauncher.launch(intent)
+        }
     }
 
     private fun setupNavigationButtons() {
@@ -85,6 +107,19 @@ class MainActivity : AppCompatActivity() {
             mapsActivityLauncher.launch(intent)
         }
     }
+
+    private fun loadPosts() {
+        val json = sharedPreferences.getString("posts", "[]")
+        val type = object : TypeToken<List<Post>>() {}.type
+        val savedPosts = gson.fromJson<List<Post>>(json, type)
+        posts.clear()
+        posts.addAll(savedPosts)
+    }
+
+    private fun savePosts() {
+        val json = gson.toJson(posts)
+        sharedPreferences.edit().putString("posts", json).apply()
+    }
 }
 
 data class Post(
@@ -92,7 +127,7 @@ data class Post(
     val mapType: String
 )
 
-class PostAdapter(private val posts: List<Post>) : 
+class PostAdapter(private val posts: List<Post>, private val onItemClick: (Int) -> Unit) :
     RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     class PostViewHolder(view: android.view.View) : RecyclerView.ViewHolder(view) {
@@ -110,6 +145,9 @@ class PostAdapter(private val posts: List<Post>) :
         val post = posts[position]
         holder.mapNameText.text = post.mapName
         holder.mapTypeText.text = post.mapType
+        holder.itemView.setOnClickListener {
+            onItemClick(position)
+        }
     }
 
     override fun getItemCount() = posts.size

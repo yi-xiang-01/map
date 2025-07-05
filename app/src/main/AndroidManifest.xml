@@ -17,9 +17,11 @@
         android:theme="@style/Theme.MapCollection"
         tools:targetApi="31">
         <activity
-            android:name=".MapsActivity"
+            android:name=".MapsActivity2"
             android:exported="false" />
-        <!-- maps SDK 的API金鑰 -->
+        <activity
+            android:name=".MapsActivity"
+            android:exported="false" /> <!-- maps SDK 的API金鑰 -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDszvxWqBKWJLd2UBXZ56vwdybN_1rJvGg" />

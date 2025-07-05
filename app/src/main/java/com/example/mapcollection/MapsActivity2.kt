@@ -1,6 +1,12 @@
 package com.example.mapcollection
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Spinner
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -11,54 +17,52 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.Spinner
-import android.widget.Button
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity2 : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_maps)
+        setContentView(R.layout.activity_maps2)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment
+
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map2Fragment) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
         // 初始化懸浮輸入區
-        val mapNameInput = findViewById<EditText>(R.id.mapNameInput)
-        val mapTypeSpinner = findViewById<Spinner>(R.id.mapTypeSpinner)
+        val planningNameInput = findViewById<EditText>(R.id.planningNameInput)
+        val planningTypeSpinner = findViewById<Spinner>(R.id.planningTypeSpinner)
         val confirmButton = findViewById<Button>(R.id.confirmButton)
-        val mapTypes = arrayOf("咖啡廳", "餐廳", "衣服店", "住宿", "台南景點", "墾丁景點","其他")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, mapTypes)
+        val planningTypes = arrayOf("規劃路線", "規劃景點")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, planningTypes)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        mapTypeSpinner.adapter = adapter
+        planningTypeSpinner.adapter = adapter
 
-        // 新增：如果有傳入資料，預設顯示
-        val incomingMapName = intent.getStringExtra("mapName")
-        val incomingMapType = intent.getStringExtra("mapType")
-        if (incomingMapName != null) {
-            mapNameInput.setText(incomingMapName)
+        // 如果有傳入資料，預設顯示
+        val incomingPlanningName = intent.getStringExtra("planningName")
+        val incomingPlanningType = intent.getStringExtra("planningType")
+        if (incomingPlanningName != null) {
+            planningNameInput.setText(incomingPlanningName)
         }
-        if (incomingMapType != null) {
-            val typeIndex = mapTypes.indexOf(incomingMapType)
+        if (incomingPlanningType != null) {
+            val typeIndex = planningTypes.indexOf(incomingPlanningType)
             if (typeIndex >= 0) {
-                mapTypeSpinner.setSelection(typeIndex)
+                planningTypeSpinner.setSelection(typeIndex)
             }
         }
 
         confirmButton.setOnClickListener {
-            val mapName = mapNameInput.text.toString()
-            val mapType = mapTypeSpinner.selectedItem?.toString() ?: ""
-            val resultIntent = android.content.Intent()
-            resultIntent.putExtra("mapName", mapName)
-            resultIntent.putExtra("mapType", mapType)
-            setResult(android.app.Activity.RESULT_OK, resultIntent)
+            val planningName = planningNameInput.text.toString()
+            val planningType = planningTypeSpinner.selectedItem?.toString() ?: ""
+            val resultIntent = Intent()
+            resultIntent.putExtra("planningName", planningName)
+            resultIntent.putExtra("planningType", planningType)
+            setResult(Activity.RESULT_OK, resultIntent)
             finish()
         }
     }
