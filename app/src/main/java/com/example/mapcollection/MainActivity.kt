@@ -169,6 +169,14 @@ class MainActivity : AppCompatActivity() {
         userNameText.text = userName
         userLabelText.text = userLabel
     }
+
+    fun deletePost(position: Int) {
+        if (position in 0 until posts.size) {
+            posts.removeAt(position)
+            recyclerView.adapter?.notifyItemRemoved(position)
+            savePosts()
+        }
+    }
 }
 
 data class Post(
@@ -182,6 +190,7 @@ class PostAdapter(private val posts: List<Post>, private val onItemClick: (Int) 
     class PostViewHolder(view: android.view.View) : RecyclerView.ViewHolder(view) {
         val mapNameText: TextView = view.findViewById(R.id.mapNameText)
         val mapTypeText: TextView = view.findViewById(R.id.mapTypeText)
+        val btnDelete: android.widget.ImageButton = view.findViewById(R.id.btnDelete)
     }
 
     override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): PostViewHolder {
@@ -196,6 +205,11 @@ class PostAdapter(private val posts: List<Post>, private val onItemClick: (Int) 
         holder.mapTypeText.text = post.mapType
         holder.itemView.setOnClickListener {
             onItemClick(position)
+        }
+        holder.btnDelete.setOnClickListener {
+            // 刪除按鈕點擊事件
+            val mainActivity = holder.itemView.context as? MainActivity
+            mainActivity?.deletePost(position)
         }
     }
 

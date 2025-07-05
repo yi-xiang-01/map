@@ -117,6 +117,14 @@ class PathActivity : AppCompatActivity() {
         val json = gson.toJson(pathPosts)
         sharedPreferences.edit().putString("pathPosts", json).apply()
     }
+
+    fun deletePathPost(position: Int) {
+        if (position in 0 until pathPosts.size) {
+            pathPosts.removeAt(position)
+            recyclerView.adapter?.notifyItemRemoved(position)
+            savePathPosts()
+        }
+    }
 }
 
 data class PathPost(
@@ -130,6 +138,7 @@ class PathPostAdapter(private val pathPosts: List<PathPost>, private val onItemC
     class PathPostViewHolder(view: android.view.View) : RecyclerView.ViewHolder(view) {
         val planningNameText: TextView = view.findViewById(R.id.planningNameText)
         val planningTypeText: TextView = view.findViewById(R.id.planningTypeText)
+        val btnDelete: android.widget.ImageButton = view.findViewById(R.id.btnDelete)
     }
 
     override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): PathPostViewHolder {
@@ -144,6 +153,11 @@ class PathPostAdapter(private val pathPosts: List<PathPost>, private val onItemC
         holder.planningTypeText.text = post.planningType
         holder.itemView.setOnClickListener {
             onItemClick(position)
+        }
+        holder.btnDelete.setOnClickListener {
+            // 刪除按鈕點擊事件
+            val pathActivity = holder.itemView.context as? PathActivity
+            pathActivity?.deletePathPost(position)
         }
     }
 

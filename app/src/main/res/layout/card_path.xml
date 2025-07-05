@@ -41,5 +41,17 @@
                 android:textColor="#666666"
                 android:textSize="12sp" />
         </LinearLayout>
+
+        <!-- 刪除按鈕放在右上角 -->
+        <ImageButton
+            android:id="@+id/btnDelete"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="8dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="刪除"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/delete" />
     </FrameLayout>
 </androidx.cardview.widget.CardView> 
