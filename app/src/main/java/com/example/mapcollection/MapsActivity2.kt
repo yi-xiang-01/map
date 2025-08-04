@@ -20,6 +20,10 @@ import com.google.android.gms.maps.model.MarkerOptions
 
 class MapsActivity2 : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
+    
+    companion object {
+        private const val INFORMATION_REQUEST_CODE = 1002
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,5 +77,25 @@ class MapsActivity2 : AppCompatActivity(), OnMapReadyCallback {
         val taiwan = LatLng(23.6978, 120.9605)
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(taiwan, 7f))
         mMap.addMarker(MarkerOptions().position(taiwan).title("台灣"))
+        
+        // 設置地圖點擊事件
+        mMap.setOnMapClickListener { latLng ->
+            // 跳轉到InformationActivity
+            val intent = Intent(this, InformationActivity::class.java)
+            intent.putExtra("latitude", latLng.latitude)
+            intent.putExtra("longitude", latLng.longitude)
+            startActivityForResult(intent, INFORMATION_REQUEST_CODE)
+        }
+    }
+    
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        
+        if (requestCode == INFORMATION_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            // 如果需要處理從InformationActivity返回的資料，可以在這裡添加
+            data?.let { intent ->
+                // TODO: 處理返回的資料
+            }
+        }
     }
 }

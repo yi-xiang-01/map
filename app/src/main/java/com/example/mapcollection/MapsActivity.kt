@@ -1,5 +1,7 @@
 package com.example.mapcollection
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +20,11 @@ import android.widget.Button
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
+    
+    companion object {
+        private const val NEW_POINT_REQUEST_CODE = 1001
+    }
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -69,5 +76,34 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val taiwan = LatLng(23.6978, 120.9605)
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(taiwan, 7f))
         mMap.addMarker(MarkerOptions().position(taiwan).title("台灣"))
+        
+        // 設置地圖點擊事件
+        mMap.setOnMapClickListener { latLng ->
+            // 跳轉到NewPointActivity
+            val intent = Intent(this, NewPointActivity::class.java)
+            intent.putExtra("latitude", latLng.latitude)
+            intent.putExtra("longitude", latLng.longitude)
+            startActivityForResult(intent, NEW_POINT_REQUEST_CODE)
+        }
+    }
+    
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        
+        if (requestCode == NEW_POINT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            data?.let { intent ->
+                val spotName = intent.getStringExtra("spotName") ?: ""
+                val spotDescription = intent.getStringExtra("spotDescription") ?: ""
+                val latitude = intent.getDoubleExtra("latitude", 0.0)
+                val longitude = intent.getDoubleExtra("longitude", 0.0)
+                
+                // 在地圖上添加新的標記
+                val newPoint = LatLng(latitude, longitude)
+                mMap.addMarker(MarkerOptions()
+                    .position(newPoint)
+                    .title(spotName)
+                    .snippet(spotDescription))
+            }
+        }
     }
 }
