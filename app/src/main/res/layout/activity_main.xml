@@ -39,6 +39,15 @@
                 android:text="個人化標籤"
                 android:textSize="16sp" />
 
+            <TextView
+                android:id="@+id/introduction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="個人簡介"
+                android:textSize="14sp"
+                android:textColor="#666666" />
+
             <Button
                 android:id="@+id/btnEditProfile"
                 android:layout_width="match_parent"

@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var editProfileLauncher: ActivityResultLauncher<Intent>
     private lateinit var userNameText: TextView
     private lateinit var userLabelText: TextView
+    private lateinit var introductionText: TextView
     private lateinit var imgProfile: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,13 +84,14 @@ class MainActivity : AppCompatActivity() {
                 val data = result.data
                 val userName = data?.getStringExtra("userName") ?: ""
                 val userLabel = data?.getStringExtra("userLabel") ?: ""
+                val introduction = data?.getStringExtra("introduction") ?: ""
                 val userPhoto = data?.getByteArrayExtra("userPhoto")
                 
-                saveUserProfile(userName, userLabel)
+                saveUserProfile(userName, userLabel, introduction)
                 if (userPhoto != null) {
                     saveUserPhoto(userPhoto)
                 }
-                updateUserProfileDisplay(userName, userLabel)
+                updateUserProfileDisplay(userName, userLabel, introduction)
                 loadUserPhoto()
             }
         }
@@ -141,6 +143,7 @@ class MainActivity : AppCompatActivity() {
             // 傳遞當前使用者資料
             intent.putExtra("currentUserName", userNameText.text.toString())
             intent.putExtra("currentUserLabel", userLabelText.text.toString())
+            intent.putExtra("currentIntroduction", introductionText.text.toString())
             editProfileLauncher.launch(intent)
         }
     }
@@ -161,19 +164,22 @@ class MainActivity : AppCompatActivity() {
     private fun loadUserProfile() {
         userNameText = findViewById(R.id.userName)
         userLabelText = findViewById(R.id.userLabel)
+        introductionText = findViewById(R.id.introduction)
         imgProfile = findViewById(R.id.imgProfile)
         
         val userName = sharedPreferences.getString("userName", "使用者姓名") ?: "使用者姓名"
         val userLabel = sharedPreferences.getString("userLabel", "個人化標籤") ?: "個人化標籤"
+        val introduction = sharedPreferences.getString("introduction", "個人簡介") ?: "個人簡介"
         
-        updateUserProfileDisplay(userName, userLabel)
+        updateUserProfileDisplay(userName, userLabel, introduction)
         loadUserPhoto()
     }
 
-    private fun saveUserProfile(userName: String, userLabel: String) {
+    private fun saveUserProfile(userName: String, userLabel: String, introduction: String) {
         sharedPreferences.edit()
             .putString("userName", userName)
             .putString("userLabel", userLabel)
+            .putString("introduction", introduction)
             .apply()
     }
 
@@ -196,9 +202,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateUserProfileDisplay(userName: String, userLabel: String) {
+    private fun updateUserProfileDisplay(userName: String, userLabel: String, introduction: String) {
         userNameText.text = userName
         userLabelText.text = userLabel
+        introductionText.text = introduction
     }
 
     fun deletePost(position: Int) {

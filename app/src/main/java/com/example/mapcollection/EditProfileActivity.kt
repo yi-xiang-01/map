@@ -54,18 +54,23 @@ class EditProfileActivity : AppCompatActivity() {
 
         val edUserName = findViewById<EditText>(R.id.edUserName)
         val edUserLabel = findViewById<EditText>(R.id.edUserLabel)
+        val edIntroduction = findViewById<EditText>(R.id.edIntroduction)
         val btnSave = findViewById<Button>(R.id.btnSave)
         imgUserPhoto = findViewById<ImageView>(R.id.imgUserPhoto)
 
         // 接收傳入的當前使用者資料並預設顯示
         val currentUserName = intent.getStringExtra("currentUserName") ?: ""
         val currentUserLabel = intent.getStringExtra("currentUserLabel") ?: ""
+        val currentIntroduction = intent.getStringExtra("currentIntroduction") ?: ""
         
         if (currentUserName.isNotEmpty() && currentUserName != "使用者姓名") {
             edUserName.setText(currentUserName)
         }
         if (currentUserLabel.isNotEmpty() && currentUserLabel != "個人化標籤") {
             edUserLabel.setText(currentUserLabel)
+        }
+        if (currentIntroduction.isNotEmpty() && currentIntroduction != "個人簡介") {
+            edIntroduction.setText(currentIntroduction)
         }
 
         // 設置圖片點擊事件
@@ -76,10 +81,12 @@ class EditProfileActivity : AppCompatActivity() {
         btnSave.setOnClickListener {
             val userName = edUserName.text.toString()
             val userLabel = edUserLabel.text.toString()
+            val introduction = edIntroduction.text.toString()
             
             val resultIntent = Intent()
             resultIntent.putExtra("userName", userName)
             resultIntent.putExtra("userLabel", userLabel)
+            resultIntent.putExtra("introduction", introduction)
             if (selectedImageBytes != null) {
                 resultIntent.putExtra("userPhoto", selectedImageBytes)
             }
