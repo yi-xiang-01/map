@@ -45,8 +45,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="個人簡介"
-                android:textSize="14sp"
-                android:textColor="#666666" />
+                android:textColor="#666666"
+                android:textSize="14sp" />
 
             <Button
                 android:id="@+id/btnEditProfile"
@@ -63,6 +63,17 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             tools:srcCompat="@tools:sample/avatars" />
+
+        <ImageButton
+            android:id="@+id/btnShowList"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:backgroundTint="@android:color/transparent"
+            android:contentDescription="更多選項"
+            android:padding="0dp"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/options" />
 
     </LinearLayout>
 
@@ -147,18 +158,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:rippleColor="#FFFFFF"
         app:srcCompat="@android:drawable/ic_input_add" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabLogout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:clickable="true"
-        android:contentDescription="登出"
-        app:backgroundTint="#F44336"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:rippleColor="#FFFFFF"
-        app:srcCompat="@android:drawable/btn_dialog" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

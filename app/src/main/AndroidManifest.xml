@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <!-- 權限 -->
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -17,39 +16,53 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MapCollection"
         tools:targetApi="31">
-
+        <activity
+            android:name=".ListActivity"
+            android:exported="false" />
         <!-- ★ 登入頁：改為啟動入口 -->
         <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
+                <action android:name="android.intent.action.MAIN" />
 
-        <!-- ★ 註冊頁 -->
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity> <!-- ★ 註冊頁 -->
         <activity
             android:name=".RegisterActivity"
-            android:exported="false"/>
-
-        <!-- 你的既有頁面 -->
-        <activity android:name=".MainActivity" android:exported="false"/>
-        <activity android:name=".EditProfileActivity" android:exported="false"/>
-        <activity android:name=".MapsActivity2" android:exported="false"/>
-        <activity android:name=".MapsActivity" android:exported="false"/>
-        <activity android:name=".RecommendActivity" android:exported="false"
-            android:theme="@style/Theme.MapCollection"/>
-        <activity android:name=".SearchActivity" android:exported="false"/>
-        <activity android:name=".PathActivity" android:exported="false"/>
-        <activity android:name=".NewPointActivity" android:exported="false"/>
-        <activity android:name=".InformationActivity" android:exported="false"/>
-
-        <!-- Google Maps API 金鑰（建議改放到 res/values/strings.xml） -->
+            android:exported="false" /> <!-- 你的既有頁面 -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MapsActivity2"
+            android:exported="false" />
+        <activity
+            android:name=".MapsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RecommendActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MapCollection" />
+        <activity
+            android:name=".SearchActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PathActivity"
+            android:exported="false" />
+        <activity
+            android:name=".NewPointActivity"
+            android:exported="false" />
+        <activity
+            android:name=".InformationActivity"
+            android:exported="false" /> <!-- Google Maps API 金鑰（建議改放到 res/values/strings.xml） -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_API_KEY_HERE"/>
-        <!-- 你現在的 key 會動；若要直接用，替換成原值即可。公開 repo 時務必改到 strings.xml 並避免上傳。 -->
-
+            android:value="YOUR_API_KEY_HERE" />
     </application>
+
 </manifest>

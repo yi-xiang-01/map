@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         setupNavigationButtons()
         setupFloatingAdd()
         setupEditProfileButton()
-        setupLogoutFab()
+        setupShowListButton()
         setupActivityResultLaunchers()
 
         // 雲端抓我的貼文（需要索引，內建 fallback）
@@ -283,24 +283,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** 登出：清空 SharedPreferences 後回登入頁 */
-    private fun setupLogoutFab() {
-        val fab = findViewById<FloatingActionButton?>(R.id.fabLogout) ?: return
-        fab.setOnClickListener {
-            val email = currentEmail
-            // 清空「已登入帳號」
-            getSharedPreferences("Account", MODE_PRIVATE).edit().clear().apply()
-            // 清空貼文與其他本地資料
-            getSharedPreferences("MapCollection", MODE_PRIVATE).edit().clear().apply()
-            // 清空該帳號的個人資料快取
-            if (email != null) {
-                getSharedPreferences("Profile_$email", MODE_PRIVATE).edit().clear().apply()
-            }
-            // 回登入頁（清掉返回堆疊）
-            val intent = Intent(this, LoginActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
-            finish()
+    private fun setupShowListButton() {
+        findViewById<ImageButton>(R.id.btnShowList).setOnClickListener {
+            startActivity(Intent(this, ListActivity::class.java))
         }
     }
 
@@ -314,33 +299,49 @@ class MainActivity : AppCompatActivity() {
                 val data = result.data
                 val mapName = data?.getStringExtra("mapName") ?: ""
                 val mapType = data?.getStringExtra("mapType") ?: ""
-
                 val email = currentEmail
                 if (email.isNullOrEmpty()) return@registerForActivityResult
 
-                // 先寫入雲端
-                val newDoc = hashMapOf(
-                    "ownerEmail" to email,
-                    "mapName" to mapName,
-                    "mapType" to mapType,
-                    "createdAt" to Timestamp.now()
-                )
-                db.collection("posts")
-                    .add(newDoc)
-                    .addOnSuccessListener { ref ->
-                        // 寫入成功 → 更新本地列表
-                        val post = Post(
-                            docId = ref.id,
-                            mapName = mapName,
-                            mapType = mapType,
-                            createdAt = newDoc["createdAt"] as Timestamp
-                        )
-                        posts.add(0, post) // 加到最上面
-                        recyclerView.adapter?.notifyItemInserted(0)
-                        recyclerView.scrollToPosition(0)
-                        savePostsToLocal()
+                val editingIdx = editingPosition
+                if (editingIdx != null && editingIdx in posts.indices) {
+                    // 編輯既有卡片：更新雲端與本地，不新增新卡片
+                    val oldPost = posts[editingIdx]
+                    val docId = oldPost.docId
+                    if (docId.isNotEmpty()) {
+                        db.collection("posts").document(docId)
+                            .update(mapOf(
+                                "mapName" to mapName,
+                                "mapType" to mapType
+                            ))
                     }
-                // （如果你也想離線立即看到，可先暫時插入一筆假 docId，等成功再覆蓋）
+                    // 更新本地列表並刷新該項
+                    posts[editingIdx] = oldPost.copy(mapName = mapName, mapType = mapType)
+                    recyclerView.adapter?.notifyItemChanged(editingIdx)
+                    savePostsToLocal()
+                    editingPosition = null
+                } else {
+                    // 新增卡片：僅在從 FAB 進入時（editingPosition 為 null）
+                    val newDoc = hashMapOf(
+                        "ownerEmail" to email,
+                        "mapName" to mapName,
+                        "mapType" to mapType,
+                        "createdAt" to Timestamp.now()
+                    )
+                    db.collection("posts")
+                        .add(newDoc)
+                        .addOnSuccessListener { ref ->
+                            val post = Post(
+                                docId = ref.id,
+                                mapName = mapName,
+                                mapType = mapType,
+                                createdAt = newDoc["createdAt"] as Timestamp
+                            )
+                            posts.add(0, post)
+                            recyclerView.adapter?.notifyItemInserted(0)
+                            recyclerView.scrollToPosition(0)
+                            savePostsToLocal()
+                        }
+                }
             }
         }
     }

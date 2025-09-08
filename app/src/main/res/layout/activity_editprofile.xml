@@ -59,7 +59,6 @@
         android:layout_marginStart="131dp"
         android:layout_marginTop="253dp"
         android:ems="10"
-        android:hint="輸入暱稱"
         android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -71,7 +70,6 @@
         android:layout_marginStart="131dp"
         android:layout_marginTop="329dp"
         android:ems="10"
-        android:hint="輸入代表您的標籤"
         android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -93,7 +91,6 @@
         android:layout_marginStart="131dp"
         android:layout_marginTop="413dp"
         android:ems="10"
-        android:hint="簡短的介紹自己"
         android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

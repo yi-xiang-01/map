@@ -61,6 +61,11 @@ class EditProfileActivity : AppCompatActivity() {
         val btnSave = findViewById<Button>(R.id.btnSave)
         imgUserPhoto = findViewById(R.id.imgUserPhoto)
 
+        // 改用 hint 呈現預設提示文字，避免成為實際輸入內容
+        edUserName.hint = "使用者姓名"
+        edUserLabel.hint = "個人化標籤"
+        edIntroduction.hint = "個人簡介"
+
         // 先用傳入預設值（若有）
         val currentUserName = intent.getStringExtra("currentUserName").orEmpty()
         val currentUserLabel = intent.getStringExtra("currentUserLabel").orEmpty()
@@ -81,13 +86,13 @@ class EditProfileActivity : AppCompatActivity() {
                         val introFromCloud = doc.getString("introduction").orEmpty()
                         val photoUrl = doc.getString("photoUrl").orEmpty()
 
-                        if (edUserName.text.isNullOrBlank() || edUserName.text.toString() == "使用者姓名") {
+                        if (edUserName.text.isNullOrBlank()) {
                             if (nameFromCloud.isNotBlank()) edUserName.setText(nameFromCloud)
                         }
-                        if (edUserLabel.text.isNullOrBlank() || edUserLabel.text.toString() == "個人化標籤") {
+                        if (edUserLabel.text.isNullOrBlank()) {
                             if (labelFromCloud.isNotBlank()) edUserLabel.setText(labelFromCloud)
                         }
-                        if (edIntroduction.text.isNullOrBlank() || edIntroduction.text.toString() == "個人簡介") {
+                        if (edIntroduction.text.isNullOrBlank()) {
                             if (introFromCloud.isNotBlank()) edIntroduction.setText(introFromCloud)
                         }
                         if (photoUrl.isNotBlank()) {

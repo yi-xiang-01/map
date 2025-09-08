@@ -27,6 +27,7 @@ class NewPointActivity : AppCompatActivity() {
         imgSpotPhoto = findViewById(R.id.imgSpotPhoto)
         btnUploadPhoto = findViewById(R.id.btnUploadPhoto)
         confirmButton = findViewById(R.id.confirmButton)
+        val btnBack2 = findViewById<android.widget.ImageButton>(R.id.btnback2)
         
         // 獲取傳入的座標資料
         val latitude = intent.getDoubleExtra("latitude", 0.0)
@@ -45,6 +46,12 @@ class NewPointActivity : AppCompatActivity() {
             resultIntent.putExtra("longitude", longitude)
             
             setResult(Activity.RESULT_OK, resultIntent)
+            finish()
+        }
+        
+        // 返回不儲存：直接取消並關閉
+        btnBack2.setOnClickListener {
+            setResult(Activity.RESULT_CANCELED)
             finish()
         }
         

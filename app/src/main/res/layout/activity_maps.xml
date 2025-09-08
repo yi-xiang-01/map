@@ -31,10 +31,14 @@
             android:layout_height="71dp"
             android:hint="地圖名稱" />
 
-        <Spinner
-            android:id="@+id/mapTypeSpinner"
-            android:layout_width="381dp"
-            android:layout_height="52dp" />
+        <EditText
+            android:id="@+id/edMapType"
+            android:layout_width="match_parent"
+            android:layout_height="66dp"
+            android:ems="10"
+            android:hint="輸入地圖種類"
+            android:inputType="text" />
+
     </LinearLayout>
 
     <!-- 確認按鈕懸浮於畫面下方 -->
