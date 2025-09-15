@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
         setupShowListButton()
         setupActivityResultLaunchers()
 
-        // 雲端抓我的貼文（需要索引，內建 fallback）
+        // 雲端抓我的貼文（需要複合索引，內建 fallback）
         fetchMyPostsFromCloud()
     }
 
@@ -185,7 +185,8 @@ class MainActivity : AppCompatActivity() {
                     val name = doc.getString("mapName") ?: ""
                     val type = doc.getString("mapType") ?: ""
                     val ts = doc.getTimestamp("createdAt")
-                    posts.add(Post(doc.id, name, type, ts))
+                    val isRec = doc.getBoolean("isRecommended") ?: false
+                    posts.add(Post(doc.id, name, type, ts, isRec))
                 }
                 recyclerView.adapter?.notifyDataSetChanged()
                 savePostsToLocal()
@@ -201,7 +202,8 @@ class MainActivity : AppCompatActivity() {
                             val name = doc.getString("mapName") ?: ""
                             val type = doc.getString("mapType") ?: ""
                             val ts = doc.getTimestamp("createdAt")
-                            posts.add(Post(doc.id, name, type, ts))
+                            val isRec = doc.getBoolean("isRecommended") ?: false
+                            posts.add(Post(doc.id, name, type, ts, isRec))
                         }
                         // 客端依 createdAt 排一次（null 放最後）
                         posts.sortByDescending { it.createdAt?.seconds ?: 0L }
@@ -218,12 +220,20 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = GridLayoutManager(this, 3)
         recyclerView.adapter = PostAdapter(posts) { position ->
             val post = posts[position]
-            // 點擊卡片 → 進入 MapsActivity 編輯（如果你要支援編輯）
-            val intent = Intent(this, MapsActivity::class.java)
-            intent.putExtra("mapName", post.mapName)
-            intent.putExtra("mapType", post.mapType)
-            editingPosition = position
-            mapsActivityLauncher.launch(intent)
+            // 推薦地圖 → 走 MapEditorActivity；其餘維持原本 MapsActivity
+            val treatAsRecommended = post.isRecommended || post.mapType == "推薦"
+            if (treatAsRecommended) {
+                startActivity(
+                    Intent(this, MapEditorActivity::class.java)
+                        .putExtra("POST_ID", post.docId)
+                )
+            } else {
+                val intent = Intent(this, MapsActivity::class.java)
+                intent.putExtra("mapName", post.mapName)
+                intent.putExtra("mapType", post.mapType)
+                editingPosition = position
+                mapsActivityLauncher.launch(intent)
+            }
         }
     }
 
@@ -265,10 +275,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupFloatingAdd() {
-        findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.floatingActionButton)
+        findViewById<FloatingActionButton>(R.id.floatingActionButton)
             .setOnClickListener {
-                val intent = Intent(this, MapsActivity::class.java)
-                mapsActivityLauncher.launch(intent)
+                // 直接進到「我的推薦地圖」編輯頁
+                startActivity(Intent(this, MapEditorActivity::class.java))
             }
     }
 
@@ -309,10 +319,12 @@ class MainActivity : AppCompatActivity() {
                     val docId = oldPost.docId
                     if (docId.isNotEmpty()) {
                         db.collection("posts").document(docId)
-                            .update(mapOf(
-                                "mapName" to mapName,
-                                "mapType" to mapType
-                            ))
+                            .update(
+                                mapOf(
+                                    "mapName" to mapName,
+                                    "mapType" to mapType
+                                )
+                            )
                     }
                     // 更新本地列表並刷新該項
                     posts[editingIdx] = oldPost.copy(mapName = mapName, mapType = mapType)
@@ -334,7 +346,8 @@ class MainActivity : AppCompatActivity() {
                                 docId = ref.id,
                                 mapName = mapName,
                                 mapType = mapType,
-                                createdAt = newDoc["createdAt"] as Timestamp
+                                createdAt = newDoc["createdAt"] as Timestamp,
+                                isRecommended = false
                             )
                             posts.add(0, post)
                             recyclerView.adapter?.notifyItemInserted(0)
@@ -353,7 +366,8 @@ data class Post(
     val docId: String = "",
     val mapName: String = "",
     val mapType: String = "",
-    val createdAt: Timestamp? = null
+    val createdAt: Timestamp? = null,
+    val isRecommended: Boolean = false // ★ 新增
 )
 
 class PostAdapter(private val posts: List<Post>, private val onItemClick: (Int) -> Unit) :

@@ -30,11 +30,22 @@ class SearchActivity : AppCompatActivity() {
 
         etQuery = findViewById(R.id.etQuery)
         rvResults = findViewById(R.id.rvResults)
-        adapter = SearchAdapter()
+
+        // ✅ 使用你提供樣式的 Adapter（加入 onItemClick 開啟唯讀 Viewer）
+        adapter = SearchAdapter { item ->
+            startActivity(
+                Intent(this, PublicMapViewerActivity::class.java)
+                    .putExtra("POST_ID", item.id)
+                    .putExtra("MAP_TITLE", item.title)
+                    // 從 subtitle 裡抓類別字串（格式：分類：xxx），額外塞給 Viewer 顯示
+                    .putExtra("MAP_TYPE", item.subtitle.removePrefix("分類："))
+            )
+        }
+
         rvResults.layoutManager = LinearLayoutManager(this)
         rvResults.adapter = adapter
 
-        // 底部導航
+        // 底部導覽
         findViewById<ImageButton>(R.id.btnRecommend)?.setOnClickListener {
             startActivity(Intent(this, RecommendActivity::class.java))
         }
@@ -59,13 +70,13 @@ class SearchActivity : AppCompatActivity() {
     }
 
     /**
-     * 排序/篩選規則：
+     * 規則沿用你之前的需求：
      * - q 含「地圖」：
      *    1) 完整命中 q（名稱>分類）優先
      *    2) 其次：僅命中「地圖」者
-     *    3) 其他全部排除
+     *    3) 其他排除
      * - q 不含「地圖」：
-     *    1) 必須完整命中 q（名稱或分類）才收
+     *    1) 必須完整命中 q（名稱或分類）
      *    2) 名稱命中優於分類命中
      *    3) 同分：命中位置越前越優，最後以 createdAt 新→舊
      */
@@ -93,13 +104,14 @@ class SearchActivity : AppCompatActivity() {
                 val rows = snap.documents.map { d ->
                     Row(
                         id = d.id,
-                        name = d.getString("mapName") ?: "",
-                        type = d.getString("mapType") ?: "",
+                        name = d.getString("mapName").orEmpty(),
+                        type = d.getString("mapType").orEmpty(),
                         createdAt = d.getTimestamp("createdAt")
                     )
                 }
 
-                val results = rows.mapNotNull { r ->
+                // 明確指定型別，避免型別推斷出錯
+                val ranked: List<Pair<Triple<Int, Int, Long>, Row>> = rows.mapNotNull { r ->
                     val nameL = r.name.lowercase(Locale.getDefault())
                     val typeL = r.type.lowercase(Locale.getDefault())
 
@@ -110,16 +122,12 @@ class SearchActivity : AppCompatActivity() {
                     val containsMapInItem = nameL.contains("地圖") || typeL.contains("地圖")
                     val mapOnlyMatch = qContainsMapWord && !hasFull && containsMapInItem
 
-                    // 篩選：符合你描述的兩種情況
-                    if (!hasFull && !(qContainsMapWord && mapOnlyMatch)) {
-                        return@mapNotNull null
-                    }
+                    // 篩選
+                    if (!hasFull && !(qContainsMapWord && mapOnlyMatch)) return@mapNotNull null
 
                     // 打分
                     var score = 0
                     var posBoost = 0
-
-                    // 完整命中優先 (名稱 > 分類)
                     if (fullHitName) {
                         score += 200
                         posBoost += 100 - nameL.indexOf(qL).coerceAtMost(100)
@@ -128,8 +136,6 @@ class SearchActivity : AppCompatActivity() {
                         score += 180
                         posBoost += 60 - typeL.indexOf(qL).coerceAtMost(60)
                     }
-
-                    // q 含「地圖」時，僅命中「地圖」屬於次優
                     if (mapOnlyMatch) {
                         val hitInName = nameL.contains("地圖")
                         val idx = if (hitInName) nameL.indexOf("地圖") else typeL.indexOf("地圖")
@@ -138,23 +144,22 @@ class SearchActivity : AppCompatActivity() {
                     }
 
                     val createdAtMillis = r.createdAt?.toDate()?.time ?: 0L
-
-                    Triple(
-                        Triple(score, posBoost, createdAtMillis),
-                        r,
-                        SearchItem(
-                            id = r.id,
-                            title = r.name,
-                            subtitle = "分類：${r.type}"
-                        )
-                    )
+                    Pair(Triple(score, posBoost, createdAtMillis), r)
                 }.sortedWith(
-                    compareByDescending<Triple<Triple<Int, Int, Long>, Row, SearchItem>> { it.first.first }   // score
+                    compareByDescending<Pair<Triple<Int, Int, Long>, Row>> { it.first.first }   // score
                         .thenByDescending { it.first.second } // posBoost
                         .thenByDescending { it.first.third }  // createdAt
-                ).map { it.third }
+                )
 
-                adapter.submitList(results)
+                val list = ranked.map { (_, r) ->
+                    com.example.mapcollection.model.SearchItem(
+                        id = r.id,
+                        title = r.name.ifBlank { "(未命名地圖)" },
+                        subtitle = "分類：${r.type.ifBlank { "未分類" }}"
+                    )
+                }
+                adapter.submitList(list)
             }
     }
+
 }

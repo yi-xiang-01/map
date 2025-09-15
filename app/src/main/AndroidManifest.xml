@@ -17,52 +17,37 @@
         android:theme="@style/Theme.MapCollection"
         tools:targetApi="31">
         <activity
-            android:name=".ListActivity"
-            android:exported="false" />
-        <!-- ★ 登入頁：改為啟動入口 -->
-        <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-        </activity> <!-- ★ 註冊頁 -->
-        <activity
-            android:name=".RegisterActivity"
-            android:exported="false" /> <!-- 你的既有頁面 -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
-        <activity
-            android:name=".EditProfileActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MapsActivity2"
-            android:exported="false" />
-        <activity
-            android:name=".MapsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".RecommendActivity"
-            android:exported="false"
-            android:theme="@style/Theme.MapCollection" />
-        <activity
-            android:name=".SearchActivity"
-            android:exported="false" />
-        <activity
-            android:name=".PathActivity"
-            android:exported="false" />
-        <activity
-            android:name=".NewPointActivity"
-            android:exported="false" />
-        <activity
-            android:name=".InformationActivity"
-            android:exported="false" /> <!-- Google Maps API 金鑰（建議改放到 res/values/strings.xml） -->
+        </activity>
+
+        <!-- 其餘頁面 -->
+        <activity android:name=".ListActivity" android:exported="false"/>
+        <activity android:name=".RegisterActivity" android:exported="false"/>
+        <activity android:name=".MainActivity" android:exported="false"/>
+        <activity android:name=".EditProfileActivity" android:exported="false"/>
+        <activity android:name=".MapEditorActivity" android:exported="false" />
+        <activity android:name=".SpotListActivity" android:exported="false"/>
+        <activity android:name=".MapsActivity2" android:exported="false"/>
+        <activity android:name=".MapsActivity" android:exported="false"/>
+        <activity android:name=".RecommendActivity" android:exported="false"
+            android:theme="@style/Theme.MapCollection"/>
+        <activity android:name=".PublicMapViewerActivity" android:exported="false" />
+        <activity android:name=".SearchActivity" android:exported="false"/>
+        <activity android:name=".PathActivity" android:exported="false"/>
+        <activity android:name=".NewPointActivity" android:exported="false"/>
+        <activity android:name=".InformationActivity" android:exported="false"/>
+        <activity android:name=".TripPlannerActivity" android:exported="false" />
+
+        <!-- ✅ 新增：地圖選點頁 -->
+        <activity android:name=".PickLocationActivity" android:exported="false"/>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_API_KEY_HERE" />
+            android:value="AIzaSyC9zvDUeXQfbEvzNmxptwyA3gu9R2mBO8Q" />
     </application>
 
 </manifest>

@@ -53,6 +53,9 @@ dependencies {
 
     implementation("androidx.multidex:multidex:2.0.1")
 
+    //地圖景點
+    implementation("com.google.android.libraries.places:places:3.5.0")
+
     implementation("com.makeramen:roundedimageview:2.3.0")
 
     // 其餘依賴（如果你用 version catalog，也可以繼續保留）

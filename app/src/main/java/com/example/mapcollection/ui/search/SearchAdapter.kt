@@ -10,7 +10,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.mapcollection.R
 import com.example.mapcollection.model.SearchItem
 
-class SearchAdapter : ListAdapter<SearchItem, SearchAdapter.VH>(Diff) {
+class SearchAdapter(
+    private val onItemClick: (SearchItem) -> Unit
+) : ListAdapter<SearchItem, SearchAdapter.VH>(Diff) {
 
     object Diff : DiffUtil.ItemCallback<SearchItem>() {
         override fun areItemsTheSame(oldItem: SearchItem, newItem: SearchItem) = oldItem.id == newItem.id
@@ -31,8 +33,9 @@ class SearchAdapter : ListAdapter<SearchItem, SearchAdapter.VH>(Diff) {
         val item = getItem(position)
         holder.title.text = item.title
         holder.sub.text = item.subtitle
-        // 保持唯讀，不做跳轉
-        holder.itemView.setOnClickListener(null)
-        holder.itemView.isClickable = false
+
+        // ✅ 唯讀瀏覽：點了開 Viewer（不提供編輯）
+        holder.itemView.setOnClickListener { onItemClick(item) }
+        holder.itemView.isClickable = true
     }
 }

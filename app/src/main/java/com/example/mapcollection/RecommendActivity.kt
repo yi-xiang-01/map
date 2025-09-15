@@ -34,7 +34,16 @@ class RecommendActivity : AppCompatActivity() {
 
         recycler = findViewById(R.id.recyclerRecommend)
         recycler.layoutManager = GridLayoutManager(this, 3)
-        adapter = PublicPostAdapter(publicPosts)
+
+        // ✅ 點卡片 → 開唯讀地圖頁（只能看，可加到行程）
+        adapter = PublicPostAdapter(publicPosts) { pos ->
+            val p = publicPosts[pos]
+            startActivity(
+                Intent(this, PublicMapViewerActivity::class.java)
+                    .putExtra("POST_ID", p.id)
+                    .putExtra("MAP_TITLE", p.mapName)
+            )
+        }
         recycler.adapter = adapter
 
         setupBottomNav()
@@ -88,9 +97,11 @@ data class PublicPost(
     val mapType: String
 )
 
-/** 直接重用 card_post，但把刪除按鈕隱藏、點擊不做編輯 */
-class PublicPostAdapter(private val posts: List<PublicPost>) :
-    RecyclerView.Adapter<PublicPostAdapter.PublicPostVH>() {
+/** 直接重用 card_post；允許點擊卡片，但不顯示刪除鍵，也不提供編輯。 */
+class PublicPostAdapter(
+    private val posts: List<PublicPost>,
+    private val onItemClick: (Int) -> Unit
+) : RecyclerView.Adapter<PublicPostAdapter.PublicPostVH>() {
 
     class PublicPostVH(v: View) : RecyclerView.ViewHolder(v) {
         val mapNameText: TextView = v.findViewById(R.id.mapNameText)
@@ -107,11 +118,13 @@ class PublicPostAdapter(private val posts: List<PublicPost>) :
     override fun onBindViewHolder(holder: PublicPostVH, position: Int) {
         val p = posts[position]
         holder.mapNameText.text = p.mapName
-        // 在類型下方顯示是誰的貼文（簡單用 email；若你想顯示 userName，可多查一次 users）
+        // 類型下方顯示貼文作者（email）
         holder.mapTypeText.text = "${p.mapType} • by ${p.ownerEmail}"
-        holder.btnDelete.visibility = View.GONE        // ✅ 唯讀：隱藏刪除鍵
-        holder.itemView.setOnClickListener(null)       // ✅ 不進入編輯
-        holder.itemView.isClickable = false
+
+        // ✅ 唯讀：隱藏刪除鍵；改成「可點卡片」
+        holder.btnDelete.visibility = View.GONE
+        holder.itemView.isClickable = true
+        holder.itemView.setOnClickListener { onItemClick(position) }
     }
 
     override fun getItemCount() = posts.size
