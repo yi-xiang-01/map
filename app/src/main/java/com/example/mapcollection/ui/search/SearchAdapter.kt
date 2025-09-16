@@ -11,7 +11,7 @@ import com.example.mapcollection.R
 import com.example.mapcollection.model.SearchItem
 
 class SearchAdapter(
-    private val onItemClick: (SearchItem) -> Unit
+    private val onItemClick: ((SearchItem) -> Unit)? = null // 可選回呼：有給就可點、沒給就唯讀
 ) : ListAdapter<SearchItem, SearchAdapter.VH>(Diff) {
 
     object Diff : DiffUtil.ItemCallback<SearchItem>() {
@@ -34,8 +34,12 @@ class SearchAdapter(
         holder.title.text = item.title
         holder.sub.text = item.subtitle
 
-        // ✅ 唯讀瀏覽：點了開 Viewer（不提供編輯）
-        holder.itemView.setOnClickListener { onItemClick(item) }
-        holder.itemView.isClickable = true
+        if (onItemClick != null) {
+            holder.itemView.isClickable = true
+            holder.itemView.setOnClickListener { onItemClick.invoke(item) }
+        } else {
+            holder.itemView.setOnClickListener(null)
+            holder.itemView.isClickable = false
+        }
     }
 }

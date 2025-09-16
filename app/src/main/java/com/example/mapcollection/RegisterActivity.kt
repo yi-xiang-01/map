@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.mapcollection.databinding.ActivityRegisterBinding
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Firebase
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.firestore
 
 class RegisterActivity : AppCompatActivity() {
@@ -33,22 +34,23 @@ class RegisterActivity : AppCompatActivity() {
 
         if (!validate(email, pwd, confirmPwd)) return
 
-        // 先用 doc(email) 判斷是否已存在
         val userDoc = db.collection("users").document(email)
         userDoc.get()
             .addOnSuccessListener { doc ->
                 if (doc.exists()) {
                     show("Email 已被註冊")
                 } else {
-                    // 註冊時就建立個資欄位（photoUrl 先預留 null）
+                    // ✅ 註冊欄位：含 following 空陣列 + firstLogin=true
                     val user = mapOf(
                         "email" to email,
-                        "password" to pwd, // ⚠️教學用；正式建議改用 Firebase Auth 或雜湊
+                        "password" to pwd,                 // 教學用；正式請改 Firebase Auth 或雜湊
                         "userName" to "使用者姓名",
-                        "userLabel" to "個人化標籤",
+                        "userLabel" to "個人化標籤",         // 之後會用來切成關鍵字
                         "introduction" to "個人簡介",
                         "photoUrl" to null,
-                        "createdAt" to com.google.firebase.Timestamp.now()
+                        "createdAt" to Timestamp.now(),
+                        "following" to emptyList<String>(), // ✅ 追蹤名單（預設空）
+                        "firstLogin" to true                // ✅ 讓 LoginActivity 判斷第一次登入
                     )
                     userDoc.set(user)
                         .addOnSuccessListener {

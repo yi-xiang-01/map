@@ -42,6 +42,9 @@
         <activity android:name=".NewPointActivity" android:exported="false"/>
         <activity android:name=".InformationActivity" android:exported="false"/>
         <activity android:name=".TripPlannerActivity" android:exported="false" />
+        <activity android:name=".FavoritesActivity" android:exported="false"/>
+        <activity android:name=".FollowingActivity" android:exported="false"/>
+        <activity android:name=".UserPublicProfileActivity" android:exported="false"/>
 
         <!-- ✅ 新增：地圖選點頁 -->
         <activity android:name=".PickLocationActivity" android:exported="false"/>

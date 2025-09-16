@@ -2,27 +2,26 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Header：返回鍵 + 地圖名稱 + 類別 -->
+    <!-- Header bar -->
     <LinearLayout
-        android:id="@+id/headerBar"
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:padding="12dp"
-        android:background="@android:color/white"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
         android:elevation="4dp">
 
         <ImageButton
             android:id="@+id/btnBack"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:background="@android:color/transparent"
-            android:contentDescription="返回"
-            android:src="@drawable/back"/>
+            android:src="@drawable/back"
+            android:contentDescription="back"/>
 
         <LinearLayout
             android:layout_width="0dp"
@@ -34,35 +33,46 @@
 
             <TextView
                 android:id="@+id/tvHeaderTitle"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="推薦地圖"
-                android:textSize="18sp"
                 android:textStyle="bold"
-                android:maxLines="1"
-                android:ellipsize="end"/>
+                android:textSize="18sp"/>
 
             <TextView
                 android:id="@+id/tvHeaderType"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=""
-                android:textSize="14sp"
-                android:textColor="#666666"
-                android:maxLines="1"
-                android:ellipsize="end"/>
+                android:text="類別"
+                android:textColor="#616161"
+                android:textSize="12sp"/>
         </LinearLayout>
+
+        <ToggleButton
+            android:id="@+id/btnFav"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:textOn="已收藏"
+            android:textOff="收藏"/>
+
+        <ToggleButton
+            android:id="@+id/btnFollow"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginStart="8dp"
+            android:textOn="已追蹤"
+            android:textOff="追蹤作者"/>
     </LinearLayout>
 
-    <!-- 地圖 -->
+    <!-- Map -->
     <fragment
         android:id="@+id/mapPublic"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="64dp" />
+        android:layout_marginTop="60dp"/>
 
-    <!-- 底部資訊面板（僅瀏覽，可加入行程） -->
+    <!-- Bottom sheet -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/spotSheet"
         android:layout_width="match_parent"
@@ -84,28 +94,25 @@
                 android:id="@+id/ivSpotPhoto"
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
-                android:adjustViewBounds="true"
                 android:scaleType="centerCrop"
-                android:contentDescription="spot photo"
-                android:src="@drawable/map" />
+                android:src="@drawable/map"/>
 
             <TextView
                 android:id="@+id/tvSpotTitle"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:text="景點名稱"
+                android:textStyle="bold"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:layout_marginTop="8dp"/>
 
             <TextView
                 android:id="@+id/tvSpotDesc"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
                 android:text="景點介紹"
                 android:textColor="#616161"
-                android:textSize="14sp" />
+                android:layout_marginTop="4dp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -118,7 +125,7 @@
                     android:id="@+id/btnAddToTrip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="加入行程" />
+                    android:text="加入行程"/>
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
