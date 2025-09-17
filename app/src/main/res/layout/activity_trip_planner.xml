@@ -7,9 +7,10 @@
 
     <LinearLayout
         android:id="@+id/dayBar"
-        android:layout_width="405dp"
-        android:layout_height="91dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:padding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -40,9 +41,17 @@
             android:src="@android:drawable/ic_media_next" />
 
         <ImageButton
+            android:id="@+id/btnExploreMap"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:contentDescription="探索地圖與詢問AI"
+            android:src="@android:drawable/ic_menu_search" />
+
+        <ImageButton
             android:id="@+id/btnAddCollaborator"
             android:layout_width="40dp"
-            android:layout_height="79dp"
+            android:layout_height="40dp"
             android:layout_marginStart="8dp"
             android:contentDescription="加協作者"
             android:src="@android:drawable/ic_input_add" />

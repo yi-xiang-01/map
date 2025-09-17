@@ -41,7 +41,6 @@ class TripPlannerActivity : AppCompatActivity() {
     private val stops = mutableListOf<TripStop>()
     private lateinit var adapter: StopAdapter
 
-    // 用 Activity Result API 接 NewPointActivity 的結果
     private lateinit var newPointLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,14 +58,21 @@ class TripPlannerActivity : AppCompatActivity() {
         )
         rv.adapter = adapter
 
+        // ✅ 已修正 R.Id -> R.id
         findViewById<ImageButton>(R.id.btnPrev).setOnClickListener {
             if (currentDay > 1) { currentDay--; updateDayTitle(); loadDay() }
         }
+        // ✅ 已修正 R.Id -> R.id
         findViewById<ImageButton>(R.id.btnNext).setOnClickListener {
             if (currentDay < tripDays) { currentDay++; updateDayTitle(); loadDay() }
         }
 
-        // 註冊接收 NewPointActivity 結果
+        // 綁定「探索地圖」按鈕的點擊事件
+        findViewById<ImageButton>(R.id.btnExploreMap).setOnClickListener {
+            // 啟動 MapsActivity2，讓使用者可以自由點擊地圖
+            startActivity(Intent(this, MapsActivity2::class.java))
+        }
+
         newPointLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { res ->
@@ -77,7 +83,6 @@ class TripPlannerActivity : AppCompatActivity() {
                 val lat = data.getDoubleExtra("latitude", .0)
                 val lng = data.getDoubleExtra("longitude", .0)
 
-                // 寫入 Firestore trips/{tripId}/days/{day}/stops
                 val doc = hashMapOf(
                     "name" to name,
                     "description" to desc,
@@ -90,7 +95,6 @@ class TripPlannerActivity : AppCompatActivity() {
                     .collection("stops")
                     .add(doc)
                     .addOnSuccessListener { ref ->
-                        // 立即插入列表（更有感）
                         val s = TripStop(
                             id = ref.id,
                             name = name,
@@ -109,10 +113,9 @@ class TripPlannerActivity : AppCompatActivity() {
         }
 
         findViewById<ImageButton>(R.id.btnAddStop).setOnClickListener {
-            // 進入你的 NewPointActivity 取得名稱/介紹/座標
             newPointLauncher.launch(
                 Intent(this, NewPointActivity::class.java)
-                    .putExtra("TRIP_ID", tripId)          // 目前 NewPointActivity 不會用到也沒關係
+                    .putExtra("TRIP_ID", tripId)
                     .putExtra("TRIP_DAY", currentDay)
             )
         }
@@ -225,7 +228,6 @@ class StopAdapter(
     private val onDelete: (Int) -> Unit
 ) : RecyclerView.Adapter<StopVH>() {
     override fun onCreateViewHolder(p: android.view.ViewGroup, vt: Int): StopVH {
-        // ★ 改成載入 item_spot（不是 item_stop）
         val v = android.view.LayoutInflater.from(p.context).inflate(R.layout.item_spot, p, false)
         return StopVH(v)
     }
@@ -240,7 +242,7 @@ class StopAdapter(
     override fun getItemCount() = data.size
 }
 class StopVH(v: android.view.View): RecyclerView.ViewHolder(v) {
-    val title: TextView = v.findViewById(R.id.tvStopTitle)   // 對應 item_spot.xml 的 id
+    val title: TextView = v.findViewById(R.id.tvStopTitle)
     val subtitle: TextView = v.findViewById(R.id.tvStopSub)
     val btnDelete: ImageButton = v.findViewById(R.id.btnDeleteStop)
 }
