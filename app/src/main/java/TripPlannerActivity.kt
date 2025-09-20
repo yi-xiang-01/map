@@ -71,10 +71,6 @@ class TripPlannerActivity : AppCompatActivity() {
             if (currentDay < tripDays) { currentDay++; updateDayTitle(); loadDay() }
         }
 
-        findViewById<ImageButton>(R.id.btnExploreMap).setOnClickListener {
-            startActivity(Intent(this, MapsActivity2::class.java))
-        }
-
         newPointLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { res ->

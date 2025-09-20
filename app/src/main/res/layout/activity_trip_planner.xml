@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- 新增：行程標題（占滿整排） -->
+    <!-- 行程標題（占滿整排） -->
     <TextView
         android:id="@+id/tvTripTitle"
         android:layout_width="0dp"
@@ -53,13 +53,7 @@
             android:contentDescription="下一天"
             android:src="@android:drawable/ic_media_next" />
 
-        <ImageButton
-            android:id="@+id/btnExploreMap"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="8dp"
-            android:contentDescription="探索地圖與詢問AI"
-            android:src="@android:drawable/ic_menu_search" />
+        <!-- 🔻 已移除 btnExploreMap -->
 
         <ImageButton
             android:id="@+id/btnAddCollaborator"

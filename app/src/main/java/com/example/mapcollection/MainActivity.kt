@@ -9,11 +9,9 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -46,15 +44,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
 
-        // 僅套用頂部狀態列 insets，底部不加（底部導覽貼齊）
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val sys = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            v.setPadding(sys.left, sys.top, sys.right, 0)
-            insets
-        }
+        // ✅ 取消 edge-to-edge，讓系統自動處理狀態列/導覽列內距（與其他頁一致）
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+
+        setContentView(R.layout.activity_main)
 
         currentEmail = getSharedPreferences("Account", MODE_PRIVATE)
             .getString("LOGGED_IN_EMAIL", null)
@@ -236,7 +230,6 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = PostAdapter(posts) { position ->
             if (position !in posts.indices) return@PostAdapter
             val post = posts[position]
-            // 一律開 MapEditorActivity
             startActivity(
                 Intent(this, MapEditorActivity::class.java)
                     .putExtra("POST_ID", post.docId)
@@ -252,9 +245,7 @@ class MainActivity : AppCompatActivity() {
             .setTitle("刪除貼文")
             .setMessage("確定要刪除「$title」嗎？此動作無法復原。")
             .setNegativeButton("取消", null)
-            .setPositiveButton("刪除") { _, _ ->
-                deletePost(position) // 真正執行刪除
-            }
+            .setPositiveButton("刪除") { _, _ -> deletePost(position) }
             .show()
     }
 
@@ -263,7 +254,6 @@ class MainActivity : AppCompatActivity() {
         val docId = posts[position].docId
         val email = currentEmail ?: return
 
-        // 刪雲端
         if (docId.isNotEmpty()) {
             db.collection("posts").document(docId)
                 .get()
@@ -274,7 +264,6 @@ class MainActivity : AppCompatActivity() {
                 }
         }
 
-        // 刪本地
         posts.removeAt(position)
         recyclerView.adapter?.notifyDataSetChanged()
         savePostsToLocal()
@@ -297,7 +286,6 @@ class MainActivity : AppCompatActivity() {
     private fun setupFloatingAdd() {
         findViewById<FloatingActionButton>(R.id.floatingActionButton)
             .setOnClickListener {
-                // 從 FAB 進入：每次建立全新貼文（非推薦）
                 startActivity(
                     Intent(this, MapEditorActivity::class.java)
                         .putExtra("NEW_POST", true)
@@ -362,13 +350,11 @@ class PostAdapter(private val posts: List<Post>, private val onItemClick: (Int) 
         holder.mapNameText.text = post.mapName
         holder.mapTypeText.text = post.mapType
 
-        // 用當下正確的位置呼叫回調
         holder.itemView.setOnClickListener {
             val realPos = holder.bindingAdapterPosition
             if (realPos in posts.indices) onItemClick(realPos)
         }
 
-        // 刪除改成先確認
         holder.btnDelete.setOnClickListener {
             val realPos = holder.bindingAdapterPosition
             (holder.itemView.context as? MainActivity)?.confirmDeletePost(realPos)
