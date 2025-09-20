@@ -54,25 +54,23 @@ class TripPlannerActivity : AppCompatActivity() {
         rv.layoutManager = LinearLayoutManager(this)
         adapter = StopAdapter(
             data = stops,
-            onDelete = { pos -> deleteStop(stops[pos]) }
+            onDelete = { pos -> confirmDeleteStop(pos) }   // ⬅️ 改成先確認
         )
         rv.adapter = adapter
 
-        // ✅ 已修正 R.Id -> R.id
         findViewById<ImageButton>(R.id.btnPrev).setOnClickListener {
             if (currentDay > 1) { currentDay--; updateDayTitle(); loadDay() }
         }
-        // ✅ 已修正 R.Id -> R.id
         findViewById<ImageButton>(R.id.btnNext).setOnClickListener {
             if (currentDay < tripDays) { currentDay++; updateDayTitle(); loadDay() }
         }
 
-        // 綁定「探索地圖」按鈕的點擊事件
+        // 「探索地圖」按鈕
         findViewById<ImageButton>(R.id.btnExploreMap).setOnClickListener {
-            // 啟動 MapsActivity2，讓使用者可以自由點擊地圖
             startActivity(Intent(this, MapsActivity2::class.java))
         }
 
+        // 新增景點（從 NewPointActivity 回傳）
         newPointLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { res ->
@@ -174,6 +172,20 @@ class TripPlannerActivity : AppCompatActivity() {
             }
     }
 
+    /** 這裡先跳出確認，再呼叫真正的刪除 */
+    private fun confirmDeleteStop(position: Int) {
+        if (position !in 0 until stops.size) return
+        val title = stops[position].name.ifBlank { "未命名景點" }
+        AlertDialog.Builder(this)
+            .setTitle("刪除景點")
+            .setMessage("確定要刪除「$title」嗎？此動作無法復原。")
+            .setNegativeButton("取消", null)
+            .setPositiveButton("刪除") { _, _ ->
+                deleteStop(stops[position])
+            }
+            .show()
+    }
+
     private fun deleteStop(stop: TripStop) {
         val id = tripId ?: return
         db.collection("trips").document(id)
@@ -213,7 +225,9 @@ class TripPlannerActivity : AppCompatActivity() {
                                     val email = items[which].second
                                     db.collection("trips").document(tripId!!)
                                         .update("collaborators", FieldValue.arrayUnion(email))
-                                        .addOnSuccessListener { Toast.makeText(this, "已加入 $email", Toast.LENGTH_SHORT).show() }
+                                        .addOnSuccessListener {
+                                            Toast.makeText(this, "已加入 $email", Toast.LENGTH_SHORT).show()
+                                        }
                                 }.show()
                         }
                     }
@@ -223,6 +237,7 @@ class TripPlannerActivity : AppCompatActivity() {
     }
 }
 
+/** 注意：這個 Adapter 不包含「刪除前確認」，讓 Activity 統一處理 **/
 class StopAdapter(
     private val data: List<TripStop>,
     private val onDelete: (Int) -> Unit
@@ -233,11 +248,15 @@ class StopAdapter(
     }
     override fun onBindViewHolder(h: StopVH, pos: Int) {
         val s = data[pos]
-        h.title.text = s.name
+        h.title.text = s.name.ifBlank { "未命名景點" }
         val coord = "${"%.5f".format(s.lat)}, ${"%.5f".format(s.lng)}"
         val desc = if (s.description.isBlank()) "" else " • ${s.description.take(30)}"
         h.subtitle.text = "$coord$desc"
-        h.btnDelete.setOnClickListener { onDelete(pos) }
+        h.btnDelete.setOnClickListener {
+            val adapterPos = h.bindingAdapterPosition
+            val finalPos = if (adapterPos != RecyclerView.NO_POSITION) adapterPos else pos
+            if (finalPos in 0 until data.size) onDelete(finalPos)
+        }
     }
     override fun getItemCount() = data.size
 }

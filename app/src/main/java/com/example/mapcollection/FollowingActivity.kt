@@ -36,7 +36,8 @@ class FollowingActivity : AppCompatActivity() {
         adapter = FollowingAdapter(data)
         rv.adapter = adapter
 
-        findViewById<android.widget.ImageButton>(R.id.btnBack).setOnClickListener { finish() }
+        findViewById<android.view.View>(R.id.btnBack).setOnClickListener { finish() }
+
     }
 
     override fun onResume() {

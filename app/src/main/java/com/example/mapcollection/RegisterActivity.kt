@@ -6,14 +6,17 @@ import android.util.Patterns
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mapcollection.databinding.ActivityRegisterBinding
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.firestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.SetOptions
 
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
     private val db = Firebase.firestore
+    private val auth = Firebase.auth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,36 +37,52 @@ class RegisterActivity : AppCompatActivity() {
 
         if (!validate(email, pwd, confirmPwd)) return
 
-        val userDoc = db.collection("users").document(email)
-        userDoc.get()
-            .addOnSuccessListener { doc ->
-                if (doc.exists()) {
-                    show("Email 已被註冊")
-                } else {
-                    // ✅ 註冊欄位：含 following 空陣列 + firstLogin=true
-                    val user = mapOf(
-                        "email" to email,
-                        "password" to pwd,                 // 教學用；正式請改 Firebase Auth 或雜湊
-                        "userName" to "使用者姓名",
-                        "userLabel" to "個人化標籤",         // 之後會用來切成關鍵字
-                        "introduction" to "個人簡介",
-                        "photoUrl" to null,
-                        "createdAt" to Timestamp.now(),
-                        "following" to emptyList<String>(), // ✅ 追蹤名單（預設空）
-                        "firstLogin" to true                // ✅ 讓 LoginActivity 判斷第一次登入
-                    )
-                    userDoc.set(user)
-                        .addOnSuccessListener {
-                            show("註冊成功！請登入")
-                            startActivity(Intent(this, LoginActivity::class.java))
-                            finish()
-                        }
-                        .addOnFailureListener { e ->
-                            show("註冊失敗：${e.localizedMessage}")
-                        }
+        // ✅ Firebase Auth 建立帳號
+        auth.createUserWithEmailAndPassword(email, pwd)
+            .addOnSuccessListener { result ->
+                val user = result.user
+                if (user?.email == null) {
+                    show("註冊成功但沒有 Email，請重試")
+                    return@addOnSuccessListener
                 }
+
+                // 記住 email（和你的既有流程相容）
+                getSharedPreferences("Account", MODE_PRIVATE)
+                    .edit()
+                    .putString("LOGGED_IN_EMAIL", user.email)
+                    .apply()
+
+                // ✅ 在 Firestore 建立/合併個人資料文件（以 email 當 docId，保留你的結構）
+                val profile = mapOf(
+                    "uid" to user.uid,
+                    "email" to user.email,
+                    // 不再存明文密碼！
+                    "userName" to "使用者姓名",
+                    "userLabel" to "個人化標籤",
+                    "introduction" to "個人簡介",
+                    "photoUrl" to null,
+                    "createdAt" to Timestamp.now(),
+                    "following" to emptyList<String>(),
+                    "firstLogin" to true
+                )
+                db.collection("users").document(user.email!!)
+                    .set(profile, SetOptions.merge())
+                    .addOnSuccessListener {
+                        show("註冊成功！請先設定個人資料")
+                        // 直接帶去編輯個資頁（已登入狀態）
+                        startActivity(Intent(this, EditProfileActivity::class.java))
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        show("建立個資失敗：${e.localizedMessage}")
+                        // 仍可讓使用者先登入頁重試
+                        startActivity(Intent(this, LoginActivity::class.java))
+                        finish()
+                    }
             }
-            .addOnFailureListener { e -> show("檢查失敗：${e.localizedMessage}") }
+            .addOnFailureListener { e ->
+                show("註冊失敗：${e.localizedMessage}")
+            }
     }
 
     private fun validate(email: String, pwd: String, confirmPwd: String): Boolean {

@@ -58,26 +58,23 @@ import java.util.Properties
         }
 
 dependencies {
-    // Firebase BoM (統一管理 Firebase 套件版本)
+    // Firebase BoM（版本照你現在的 33.1.2 也 OK）
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
 
-    // 明確加入 Firestore 和 Storage 的依賴
-    implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-storage")
+    // ✅ 加上 Auth KTX，並把 Firestore/Storage 換成 KTX 版本
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
 
-    // Gemini AI
     implementation("com.google.ai.client.generativeai:generativeai:0.7.0")
-    // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
-    // Glide (圖片載入)
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("com.google.android.material:material:1.12.0")
 
-
-    // 您專案原有的其他依賴
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material)
+
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.navigation.fragment.ktx)

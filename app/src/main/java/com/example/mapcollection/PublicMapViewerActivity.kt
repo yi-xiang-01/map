@@ -46,6 +46,7 @@ class PublicMapViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     // Header views
     private lateinit var tvHeaderTitle: TextView
     private lateinit var tvHeaderType: TextView
+    private lateinit var tvHeaderAuthor: TextView   // ★ 新增：作者顯示
     private lateinit var btnFav: ToggleButton
     private lateinit var btnFollow: ToggleButton
 
@@ -73,12 +74,14 @@ class PublicMapViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         // Header
         tvHeaderTitle = findViewById(R.id.tvHeaderTitle)
         tvHeaderType = findViewById(R.id.tvHeaderType)
+        tvHeaderAuthor = findViewById(R.id.tvHeaderAuthor) // ★ 新增
         btnFav = findViewById(R.id.btnFav)
         btnFollow = findViewById(R.id.btnFollow)
-        findViewById<ImageButton>(R.id.btnBack).setOnClickListener { finish() }
+        findViewById<android.view.View>(R.id.btnBack).setOnClickListener { finish() }
 
         tvHeaderTitle.text = mapTitle ?: "推薦地圖"
         tvHeaderType.text = mapType ?: ""
+        ownerEmail?.let { loadAuthorName(it) } // ★ 直接載入作者名字（若有帶進來）
 
         // Map
         (supportFragmentManager.findFragmentById(R.id.mapPublic) as SupportMapFragment)
@@ -160,6 +163,7 @@ class PublicMapViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 .addOnSuccessListener { d ->
                     ownerEmail = d.getString("ownerEmail")
                     preloadFavFollowState()
+                    ownerEmail?.let { loadAuthorName(it) } // ★ 查到作者後載入顯示名稱
                 }
         }
 
@@ -205,6 +209,18 @@ class PublicMapViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             true
         }
+    }
+
+    // ★ 依作者 email 讀取使用者顯示名稱（userName），找不到就用 email
+    private fun loadAuthorName(email: String) {
+        db.collection("users").document(email).get()
+            .addOnSuccessListener { doc ->
+                val name = doc.getString("userName")?.takeIf { it.isNotBlank() } ?: email
+                tvHeaderAuthor.text = "作者：$name"
+            }
+            .addOnFailureListener {
+                tvHeaderAuthor.text = "作者：$email"
+            }
     }
 
     private fun pickTripAndDayThenAdd() {

@@ -4,19 +4,21 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.view.ContextThemeWrapper
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
@@ -29,16 +31,14 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private val posts = mutableListOf<Post>()
-    private lateinit var mapsActivityLauncher: ActivityResultLauncher<Intent>
-    private var editingPosition: Int? = null
     private lateinit var sharedPreferences: SharedPreferences
     private val gson = Gson()
 
     // 個人資料 UI
     private lateinit var userNameText: TextView
-    private lateinit var userLabelText: TextView
     private lateinit var introductionText: TextView
     private lateinit var imgProfile: ImageView
+    private lateinit var chipGroupLabels: ChipGroup
 
     // Firestore
     private val db = Firebase.firestore
@@ -48,27 +48,25 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        // 僅套用頂部狀態列 insets，底部不加（底部導覽貼齊）
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val sys = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(sys.left, sys.top, sys.right, sys.bottom)
+            val sys = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            v.setPadding(sys.left, sys.top, sys.right, 0)
             insets
         }
 
-        // 目前登入的帳號（LoginActivity 已寫入）
         currentEmail = getSharedPreferences("Account", MODE_PRIVATE)
             .getString("LOGGED_IN_EMAIL", null)
 
-        // 本地儲存（貼文）
         sharedPreferences = getSharedPreferences("MapCollection", MODE_PRIVATE)
-        loadPostsFromLocal() // 先顯示本地快取避免白畫面
+        loadPostsFromLocal()
 
-        // 綁定個人資料區塊
         userNameText = findViewById(R.id.userName)
-        userLabelText = findViewById(R.id.userLabel)
         introductionText = findViewById(R.id.introduction)
         imgProfile = findViewById(R.id.imgProfile)
+        chipGroupLabels = findViewById(R.id.chipGroupLabels)
 
-        // 先載入「本地快取」避免白畫面，再去雲端更新
         loadProfileFromLocal()
         fetchProfileFromCloud()
 
@@ -77,15 +75,12 @@ class MainActivity : AppCompatActivity() {
         setupFloatingAdd()
         setupEditProfileButton()
         setupShowListButton()
-        setupActivityResultLaunchers()
 
-        // 雲端抓我的貼文（需要複合索引，內建 fallback）
         fetchMyPostsFromCloud()
     }
 
     override fun onResume() {
         super.onResume()
-        // 從編輯頁回來或切回前景，刷新一次雲端資料／貼文
         fetchProfileFromCloud()
         fetchMyPostsFromCloud()
     }
@@ -99,7 +94,7 @@ class MainActivity : AppCompatActivity() {
         val userName = prefs.getString("userName", "使用者姓名") ?: "使用者姓名"
         val userLabel = prefs.getString("userLabel", "個人化標籤") ?: "個人化標籤"
         val introduction = prefs.getString("introduction", "個人簡介") ?: "個人簡介"
-        val photoBase64 = prefs.getString("userPhotoBase64", null) // 舊版本地圖片（若有）
+        val photoBase64 = prefs.getString("userPhotoBase64", null)
         val photoUrl = prefs.getString("photoUrl", null)
 
         updateUserProfileDisplay(userName, userLabel, introduction)
@@ -152,8 +147,31 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateUserProfileDisplay(userName: String, userLabel: String, introduction: String) {
         userNameText.text = userName
-        userLabelText.text = userLabel
         introductionText.text = introduction
+        renderLabelChips(userLabel)
+    }
+
+    private fun renderLabelChips(raw: String) {
+        chipGroupLabels.removeAllViews()
+
+        val tokens = raw
+            .replace("，", ",")
+            .replace("、", ",")
+            .split(',', '#', ' ')
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .distinct()
+
+        for (t in tokens) {
+            val themedCtx = try { ContextThemeWrapper(this, R.style.ChipStyle_Label) } catch (_: Exception) { this }
+            val chip = Chip(themedCtx, null, 0).apply {
+                text = t
+                isCheckable = false
+                isClickable = false
+                setEnsureMinTouchTargetSize(false)
+            }
+            chipGroupLabels.addView(chip)
+        }
     }
 
     // ---------------- 我的貼文：雲端 ↔ 本地 ----------------
@@ -174,7 +192,6 @@ class MainActivity : AppCompatActivity() {
     private fun fetchMyPostsFromCloud() {
         val email = currentEmail ?: return
 
-        // 嘗試使用 where + orderBy（需要複合索引：ownerEmail== + createdAt desc）
         db.collection("posts")
             .whereEqualTo("ownerEmail", email)
             .orderBy("createdAt", Query.Direction.DESCENDING)
@@ -192,7 +209,6 @@ class MainActivity : AppCompatActivity() {
                 savePostsToLocal()
             }
             .addOnFailureListener {
-                // 索引尚未建立 → 退而求其次，不排序
                 db.collection("posts")
                     .whereEqualTo("ownerEmail", email)
                     .get()
@@ -205,7 +221,6 @@ class MainActivity : AppCompatActivity() {
                             val isRec = doc.getBoolean("isRecommended") ?: false
                             posts.add(Post(doc.id, name, type, ts, isRec))
                         }
-                        // 客端依 createdAt 排一次（null 放最後）
                         posts.sortByDescending { it.createdAt?.seconds ?: 0L }
                         recyclerView.adapter?.notifyDataSetChanged()
                         savePostsToLocal()
@@ -219,22 +234,28 @@ class MainActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = GridLayoutManager(this, 3)
         recyclerView.adapter = PostAdapter(posts) { position ->
+            if (position !in posts.indices) return@PostAdapter
             val post = posts[position]
-            // 推薦地圖 → 走 MapEditorActivity；其餘維持原本 MapsActivity
-            val treatAsRecommended = post.isRecommended || post.mapType == "推薦"
-            if (treatAsRecommended) {
-                startActivity(
-                    Intent(this, MapEditorActivity::class.java)
-                        .putExtra("POST_ID", post.docId)
-                )
-            } else {
-                val intent = Intent(this, MapsActivity::class.java)
-                intent.putExtra("mapName", post.mapName)
-                intent.putExtra("mapType", post.mapType)
-                editingPosition = position
-                mapsActivityLauncher.launch(intent)
-            }
+            // 一律開 MapEditorActivity
+            startActivity(
+                Intent(this, MapEditorActivity::class.java)
+                    .putExtra("POST_ID", post.docId)
+            )
         }
+    }
+
+    fun confirmDeletePost(position: Int) {
+        if (position !in 0 until posts.size) return
+        val title = posts[position].mapName.ifBlank { "未命名地圖" }
+
+        AlertDialog.Builder(this)
+            .setTitle("刪除貼文")
+            .setMessage("確定要刪除「$title」嗎？此動作無法復原。")
+            .setNegativeButton("取消", null)
+            .setPositiveButton("刪除") { _, _ ->
+                deletePost(position) // 真正執行刪除
+            }
+            .show()
     }
 
     fun deletePost(position: Int) {
@@ -247,7 +268,6 @@ class MainActivity : AppCompatActivity() {
             db.collection("posts").document(docId)
                 .get()
                 .addOnSuccessListener { doc ->
-                    // 保險：確定是自己的再刪
                     if (doc.exists() && doc.getString("ownerEmail") == email) {
                         db.collection("posts").document(docId).delete()
                     }
@@ -277,8 +297,11 @@ class MainActivity : AppCompatActivity() {
     private fun setupFloatingAdd() {
         findViewById<FloatingActionButton>(R.id.floatingActionButton)
             .setOnClickListener {
-                // 直接進到「我的推薦地圖」編輯頁
-                startActivity(Intent(this, MapEditorActivity::class.java))
+                // 從 FAB 進入：每次建立全新貼文（非推薦）
+                startActivity(
+                    Intent(this, MapEditorActivity::class.java)
+                        .putExtra("NEW_POST", true)
+                )
             }
     }
 
@@ -286,76 +309,25 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnEditProfile).setOnClickListener {
             val intent = Intent(this, EditProfileActivity::class.java).apply {
                 putExtra("currentUserName", userNameText.text.toString())
-                putExtra("currentUserLabel", userLabelText.text.toString())
+                putExtra("currentUserLabel", getCurrentLabelsAsString())
                 putExtra("currentIntroduction", introductionText.text.toString())
             }
             startActivity(intent)
         }
     }
 
+    private fun getCurrentLabelsAsString(): String {
+        val list = mutableListOf<String>()
+        for (i in 0 until chipGroupLabels.childCount) {
+            val c = chipGroupLabels.getChildAt(i)
+            if (c is Chip) list.add(c.text?.toString() ?: "")
+        }
+        return list.filter { it.isNotEmpty() }.joinToString(",")
+    }
+
     private fun setupShowListButton() {
         findViewById<ImageButton>(R.id.btnShowList).setOnClickListener {
             startActivity(Intent(this, ListActivity::class.java))
-        }
-    }
-
-    // ---------------- Activity Result ----------------
-
-    private fun setupActivityResultLaunchers() {
-        mapsActivityLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { result ->
-            if (result.resultCode == RESULT_OK) {
-                val data = result.data
-                val mapName = data?.getStringExtra("mapName") ?: ""
-                val mapType = data?.getStringExtra("mapType") ?: ""
-                val email = currentEmail
-                if (email.isNullOrEmpty()) return@registerForActivityResult
-
-                val editingIdx = editingPosition
-                if (editingIdx != null && editingIdx in posts.indices) {
-                    // 編輯既有卡片：更新雲端與本地，不新增新卡片
-                    val oldPost = posts[editingIdx]
-                    val docId = oldPost.docId
-                    if (docId.isNotEmpty()) {
-                        db.collection("posts").document(docId)
-                            .update(
-                                mapOf(
-                                    "mapName" to mapName,
-                                    "mapType" to mapType
-                                )
-                            )
-                    }
-                    // 更新本地列表並刷新該項
-                    posts[editingIdx] = oldPost.copy(mapName = mapName, mapType = mapType)
-                    recyclerView.adapter?.notifyItemChanged(editingIdx)
-                    savePostsToLocal()
-                    editingPosition = null
-                } else {
-                    // 新增卡片：僅在從 FAB 進入時（editingPosition 為 null）
-                    val newDoc = hashMapOf(
-                        "ownerEmail" to email,
-                        "mapName" to mapName,
-                        "mapType" to mapType,
-                        "createdAt" to Timestamp.now()
-                    )
-                    db.collection("posts")
-                        .add(newDoc)
-                        .addOnSuccessListener { ref ->
-                            val post = Post(
-                                docId = ref.id,
-                                mapName = mapName,
-                                mapType = mapType,
-                                createdAt = newDoc["createdAt"] as Timestamp,
-                                isRecommended = false
-                            )
-                            posts.add(0, post)
-                            recyclerView.adapter?.notifyItemInserted(0)
-                            recyclerView.scrollToPosition(0)
-                            savePostsToLocal()
-                        }
-                }
-            }
         }
     }
 }
@@ -367,7 +339,7 @@ data class Post(
     val mapName: String = "",
     val mapType: String = "",
     val createdAt: Timestamp? = null,
-    val isRecommended: Boolean = false // ★ 新增
+    val isRecommended: Boolean = false
 )
 
 class PostAdapter(private val posts: List<Post>, private val onItemClick: (Int) -> Unit) :
@@ -389,9 +361,17 @@ class PostAdapter(private val posts: List<Post>, private val onItemClick: (Int) 
         val post = posts[position]
         holder.mapNameText.text = post.mapName
         holder.mapTypeText.text = post.mapType
-        holder.itemView.setOnClickListener { onItemClick(position) }
+
+        // 用當下正確的位置呼叫回調
+        holder.itemView.setOnClickListener {
+            val realPos = holder.bindingAdapterPosition
+            if (realPos in posts.indices) onItemClick(realPos)
+        }
+
+        // 刪除改成先確認
         holder.btnDelete.setOnClickListener {
-            (holder.itemView.context as? MainActivity)?.deletePost(position)
+            val realPos = holder.bindingAdapterPosition
+            (holder.itemView.context as? MainActivity)?.confirmDeletePost(realPos)
         }
     }
 

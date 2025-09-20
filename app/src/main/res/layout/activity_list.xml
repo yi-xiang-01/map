@@ -7,16 +7,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnback"
-        android:layout_width="48dp"
+        android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_margin="12dp"
-        android:backgroundTint="@android:color/transparent"
-        android:src="@drawable/back"
-        android:contentDescription="返回"
+        android:text="\u2039 Back"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        app:backgroundTint="#3F51B5"
+        app:cornerRadius="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:rippleColor="#3F51B5" />
 
     <!-- 文字版登出 -->
 
