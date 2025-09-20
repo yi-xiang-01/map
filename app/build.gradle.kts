@@ -66,6 +66,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-storage-ktx")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("com.google.android.libraries.places:places:3.5.0")
 
     implementation("com.google.ai.client.generativeai:generativeai:0.7.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")

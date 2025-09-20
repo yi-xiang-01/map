@@ -42,7 +42,6 @@ class TripStopDetailActivity : AppCompatActivity(), OnMapReadyCallback {
     private var lng: Double = .0
     private var gmap: GoogleMap? = null
 
-    // 選相片
     private val imagePicker = registerForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.GetContent()
     ) { uri ->
@@ -149,10 +148,12 @@ class TripStopDetailActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun openInformationAI() {
+        // 帶上景點名稱（顯示用），AI 還是用座標
         startActivity(
             Intent(this, InformationActivity::class.java)
                 .putExtra("latitude", lat)
                 .putExtra("longitude", lng)
+                .putExtra("spotName", tvTitle.text.toString()) // ★ 關鍵：把名字一起帶過去
         )
     }
 }

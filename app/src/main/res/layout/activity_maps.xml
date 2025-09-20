@@ -49,7 +49,7 @@
         android:layout_margin="16dp"
         android:text="儲存"
         android:textColor="#FFFFFF"
-        app:backgroundTint="#79CBF0"
+        app:backgroundTint="#673AB7"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

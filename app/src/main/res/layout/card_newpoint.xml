@@ -45,11 +45,14 @@
         <LinearLayout
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="horizontal" android:paddingHorizontal="16dp">
+
             <Button
                 android:id="@+id/btnPickCoord"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="選擇座標" android:textSize="14sp"
-                android:backgroundTint="#79CBF0"/>
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#673AB7"
+                android:text="選擇座標"
+                android:textSize="14sp" />
         </LinearLayout>
 
         <!-- 照片上傳區域 -->
@@ -66,14 +69,20 @@
 
             <Button
                 android:id="@+id/btnUploadPhoto"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" android:text="上傳照片" android:textSize="14sp"
-                android:backgroundTint="#79CBF0" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="#673AB7"
+                android:text="上傳照片"
+                android:textSize="14sp" />
         </LinearLayout>
 
         <Button
             android:id="@+id/confirmButton"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_margin="16dp" android:text="儲存" android:backgroundTint="#79CBF0" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:backgroundTint="#673AB7"
+            android:text="儲存" />
     </LinearLayout>
 </ScrollView>

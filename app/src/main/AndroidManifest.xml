@@ -51,7 +51,7 @@
         <activity android:name=".PickLocationActivity" android:exported="false"/>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDJlVFbRgLbjVkj-LL7XJIRCP57td6OjNE" />
+            android:value="AIzaSyC9zvDUeXQfbEvzNmxptwyA3gu9R2mBO8Q" />
     </application>
 
 </manifest>

@@ -77,11 +77,11 @@
         android:layout_width="110dp"
         android:layout_height="40dp"
         android:layout_marginEnd="16dp"
+        android:backgroundTint="#673AB7"
         android:text="上傳照片"
-        android:backgroundTint="#79CBF0"
-        app:layout_constraintTop_toBottomOf="@id/mapStop"
         app:layout_constraintBottom_toBottomOf="@id/ivPhoto"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mapStop" />
 
     <!-- 底部：導航 / 詢問AI -->
     <LinearLayout
@@ -100,8 +100,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="導航"
-            android:backgroundTint="#79CBF0" />
+            android:backgroundTint="#673AB7"
+            android:text="導航" />
 
         <Button
             android:id="@+id/btnAskAI"
@@ -109,8 +109,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_weight="1"
-            android:text="詢問AI"
-            android:backgroundTint="#79CBF0" />
+            android:backgroundTint="#673AB7"
+            android:text="詢問AI" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -14,7 +14,7 @@
         android:layout_marginStart="128dp"
         android:layout_marginTop="520dp"
         android:text="儲存"
-        app:backgroundTint="#79CBF0"
+        app:backgroundTint="#673AB7"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

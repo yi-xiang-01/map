@@ -3,7 +3,10 @@ package com.example.mapcollection
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
-import android.widget.*
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -40,12 +43,14 @@ class TripPlannerActivity : AppCompatActivity() {
     private lateinit var rv: RecyclerView
     private val stops = mutableListOf<TripStop>()
     private lateinit var adapter: StopAdapter
+    private lateinit var tvTripTitle: TextView
 
     private lateinit var newPointLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_trip_planner)
+        tvTripTitle = findViewById(R.id.tvTripTitle)
 
         tripId = intent.getStringExtra("TRIP_ID")
         if (tripId == null) { finish(); return }
@@ -54,7 +59,8 @@ class TripPlannerActivity : AppCompatActivity() {
         rv.layoutManager = LinearLayoutManager(this)
         adapter = StopAdapter(
             data = stops,
-            onDelete = { pos -> confirmDeleteStop(pos) }   // ⬅️ 改成先確認
+            onOpen = { pos -> openStopDetail(stops[pos]) },
+            onDelete = { pos -> confirmDeleteStop(stops[pos]) }
         )
         rv.adapter = adapter
 
@@ -65,12 +71,10 @@ class TripPlannerActivity : AppCompatActivity() {
             if (currentDay < tripDays) { currentDay++; updateDayTitle(); loadDay() }
         }
 
-        // 「探索地圖」按鈕
         findViewById<ImageButton>(R.id.btnExploreMap).setOnClickListener {
             startActivity(Intent(this, MapsActivity2::class.java))
         }
 
-        // 新增景點（從 NewPointActivity 回傳）
         newPointLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { res ->
@@ -129,6 +133,7 @@ class TripPlannerActivity : AppCompatActivity() {
                 tripDays = (d.getLong("days") ?: 7L).toInt().coerceIn(1, 7)
                 startMillis = d.getTimestamp("startDate")?.toDate()?.time
                 currentDay = currentDay.coerceIn(1, tripDays)
+                tvTripTitle.text = d.getString("title") ?: "未命名行程"
                 updateDayTitle()
                 loadDay()
             }
@@ -172,17 +177,12 @@ class TripPlannerActivity : AppCompatActivity() {
             }
     }
 
-    /** 這裡先跳出確認，再呼叫真正的刪除 */
-    private fun confirmDeleteStop(position: Int) {
-        if (position !in 0 until stops.size) return
-        val title = stops[position].name.ifBlank { "未命名景點" }
+    private fun confirmDeleteStop(stop: TripStop) {
         AlertDialog.Builder(this)
             .setTitle("刪除景點")
-            .setMessage("確定要刪除「$title」嗎？此動作無法復原。")
+            .setMessage("確定要刪除「${stop.name.ifBlank { "未命名景點" }}」嗎？")
             .setNegativeButton("取消", null)
-            .setPositiveButton("刪除") { _, _ ->
-                deleteStop(stops[position])
-            }
+            .setPositiveButton("刪除") { _, _ -> deleteStop(stop) }
             .show()
     }
 
@@ -199,6 +199,19 @@ class TripPlannerActivity : AppCompatActivity() {
                     adapter.notifyItemRemoved(idx)
                 }
             }
+    }
+
+    private fun openStopDetail(s: TripStop) {
+        val i = Intent(this, TripStopDetailActivity::class.java)
+            .putExtra("TRIP_ID", tripId)
+            .putExtra("DAY", currentDay)
+            .putExtra("STOP_ID", s.id)
+            .putExtra("STOP_NAME", s.name)
+            .putExtra("STOP_DESC", s.description)
+            .putExtra("LAT", s.lat)
+            .putExtra("LNG", s.lng)
+            .putExtra("PHOTO_URL", s.photoUrl)
+        startActivity(i)
     }
 
     private fun addCollaboratorFlow() {
@@ -225,9 +238,7 @@ class TripPlannerActivity : AppCompatActivity() {
                                     val email = items[which].second
                                     db.collection("trips").document(tripId!!)
                                         .update("collaborators", FieldValue.arrayUnion(email))
-                                        .addOnSuccessListener {
-                                            Toast.makeText(this, "已加入 $email", Toast.LENGTH_SHORT).show()
-                                        }
+                                        .addOnSuccessListener { Toast.makeText(this, "已加入 $email", Toast.LENGTH_SHORT).show() }
                                 }.show()
                         }
                     }
@@ -237,29 +248,39 @@ class TripPlannerActivity : AppCompatActivity() {
     }
 }
 
-/** 注意：這個 Adapter 不包含「刪除前確認」，讓 Activity 統一處理 **/
+/** Adapter：支援點擊開詳細頁 + 刪除 */
 class StopAdapter(
     private val data: List<TripStop>,
+    private val onOpen: (Int) -> Unit,
     private val onDelete: (Int) -> Unit
 ) : RecyclerView.Adapter<StopVH>() {
+
     override fun onCreateViewHolder(p: android.view.ViewGroup, vt: Int): StopVH {
-        val v = android.view.LayoutInflater.from(p.context).inflate(R.layout.item_spot, p, false)
+        val v = android.view.LayoutInflater.from(p.context)
+            .inflate(R.layout.item_spot, p, false)
         return StopVH(v)
     }
+
     override fun onBindViewHolder(h: StopVH, pos: Int) {
         val s = data[pos]
         h.title.text = s.name.ifBlank { "未命名景點" }
         val coord = "${"%.5f".format(s.lat)}, ${"%.5f".format(s.lng)}"
         val desc = if (s.description.isBlank()) "" else " • ${s.description.take(30)}"
         h.subtitle.text = "$coord$desc"
+
+        h.itemView.setOnClickListener {
+            val p = h.bindingAdapterPosition
+            if (p != RecyclerView.NO_POSITION) onOpen(p)
+        }
         h.btnDelete.setOnClickListener {
-            val adapterPos = h.bindingAdapterPosition
-            val finalPos = if (adapterPos != RecyclerView.NO_POSITION) adapterPos else pos
-            if (finalPos in 0 until data.size) onDelete(finalPos)
+            val p = h.bindingAdapterPosition
+            if (p != RecyclerView.NO_POSITION) onDelete(p)
         }
     }
+
     override fun getItemCount() = data.size
 }
+
 class StopVH(v: android.view.View): RecyclerView.ViewHolder(v) {
     val title: TextView = v.findViewById(R.id.tvStopTitle)
     val subtitle: TextView = v.findViewById(R.id.tvStopSub)

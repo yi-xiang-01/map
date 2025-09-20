@@ -1,11 +1,11 @@
 package com.example.mapcollection
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.ai.client.generativeai.GenerativeModel
 import kotlinx.coroutines.launch
@@ -16,10 +16,10 @@ class InformationActivity : AppCompatActivity() {
     private lateinit var btnBack: Button
     private lateinit var btnAskAI: Button
     private lateinit var btnNearbySpots: Button
-    private lateinit var btnAddToTrip: Button
 
     private var latitude: Double = 0.0
     private var longitude: Double = 0.0
+    private var spotName: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,30 +27,22 @@ class InformationActivity : AppCompatActivity() {
 
         tvLocName = findViewById(R.id.tvLocName)
         btnBack = findViewById(R.id.btnBack)
-        btnAskAI = findViewById(R.id.button)
-        btnNearbySpots = findViewById(R.id.button2)
-        btnAddToTrip = findViewById(R.id.button3)
+        btnAskAI = findViewById(R.id.button)   // 「詢問AI」按鈕
+        btnNearbySpots = findViewById(R.id.button2) // 「介紹附近景點」
 
+        // 讀取參數（名稱可用於顯示，AI 還是用座標）
         latitude = intent.getDoubleExtra("latitude", 0.0)
         longitude = intent.getDoubleExtra("longitude", 0.0)
+        spotName = intent.getStringExtra("spotName")
+            ?: intent.getStringExtra("EXTRA_SPOT_NAME") // 兼容你可能的其他 key
 
-        tvLocName.text = "座標: $latitude, $longitude"
+        val hasName = !spotName.isNullOrBlank() && spotName != "null"
+        tvLocName.text = if (hasName) spotName else "座標: $latitude, $longitude"
 
-        btnBack.setOnClickListener {
-            finish()
-        }
+        btnBack.setOnClickListener { finish() }
 
-        btnAskAI.setOnClickListener {
-            showAskAIDialog()
-        }
-
-        btnNearbySpots.setOnClickListener {
-            findNearbyAttractions()
-        }
-
-        btnAddToTrip.setOnClickListener {
-            // TODO: 實現加入行程功能
-        }
+        btnAskAI.setOnClickListener { showAskAIDialog() }
+        btnNearbySpots.setOnClickListener { findNearbyAttractions() }
     }
 
     private fun showAskAIDialog() {
@@ -62,6 +54,7 @@ class InformationActivity : AppCompatActivity() {
             .setPositiveButton("送出") { dialog, _ ->
                 val question = editText.text.toString()
                 if (question.isNotBlank()) {
+                    // 即使顯示是名字，AI 還是用座標來回答
                     val prompt = "關於地點座標 ($latitude, $longitude)，我想知道：$question"
                     callGemini(prompt, "AI 的回答")
                 }
@@ -72,21 +65,19 @@ class InformationActivity : AppCompatActivity() {
     }
 
     private fun findNearbyAttractions() {
-        val prompt = "請用繁體中文推薦在座標 ($latitude, $longitude) 附近的5個景點，並為每個景點提供一句話的簡短介紹。"
+        val prompt =
+            "請用繁體中文推薦在座標 ($latitude, $longitude) 附近的5個景點，並為每個景點提供一句話的簡短介紹。"
         callGemini(prompt, "附近景點推薦")
     }
 
     private fun callGemini(prompt: String, title: String) {
-        // 顯示一個載入中的對話框
         val loadingDialog = AlertDialog.Builder(this)
             .setMessage("AI 思考中...")
             .setCancelable(false)
             .show()
 
         val generativeModel = GenerativeModel(
-            // 使用正確的模型名稱
             modelName = "gemini-2.0-flash",
-            // 從 BuildConfig 安全地讀取 API 金鑰
             apiKey = BuildConfig.GEMINI_API_KEY
         )
 

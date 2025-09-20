@@ -18,11 +18,11 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnBack"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
+            android:layout_height="62dp"
             android:text="\u2039 Back"
             android:textAllCaps="false"
-            android:textSize="14sp"
             android:textColor="@android:color/white"
+            android:textSize="14sp"
             app:backgroundTint="#3F51B5"
             app:cornerRadius="8dp"
             app:rippleColor="#3F51B5" />
@@ -64,17 +64,17 @@
         <ToggleButton
             android:id="@+id/btnFav"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:textOn="已收藏"
-            android:textOff="收藏"/>
+            android:layout_height="62dp"
+            android:textOff="收藏"
+            android:textOn="已收藏" />
 
         <ToggleButton
             android:id="@+id/btnFollow"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
+            android:layout_height="60dp"
             android:layout_marginStart="8dp"
-            android:textOn="已追蹤"
-            android:textOff="追蹤作者"/>
+            android:textOff="追蹤作者"
+            android:textOn="已追蹤" />
     </LinearLayout>
 
     <!-- Map -->
